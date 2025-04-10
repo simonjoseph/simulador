@@ -1,0 +1,39 @@
+<?php
+require_once 'vendor/autoload.php'; // Para carregar o Composer
+
+use PhpOffice\PhpWord\TemplateProcessor;
+
+// Função para preencher o template.docx com dados
+function preencherTemplate($dados) {
+    // Carregar o arquivo do template
+    $templateProcessor = new TemplateProcessor('template.docx');
+    
+    // Substituir as variáveis do template com os dados
+    foreach ($dados as $chave => $valor) {
+        $templateProcessor->setValue($chave, $valor);
+    }
+    
+    // Salvar o arquivo gerado
+    $outputFile = 'resultado.docx';
+    $templateProcessor->saveAs($outputFile);
+    
+    return $outputFile;
+}
+
+// Exemplo de dados que você quer preencher
+$dados = [
+    'nome' => 'Simão José',
+    'matricula' => '28 anos',
+    'marca' => 'toyota',
+    'modelo' => 'rav-4',
+    'cilindrada' => '2.0',
+    'categoria' => 'categoria 123',
+    'ano' => '2023',
+    'rc_legal' => '100px',
+    'comercial_rc' => '200px',
+    'data_actual' => '10/24/2023',
+];
+
+$arquivoPreenchido = preencherTemplate($dados);
+echo "Template preenchido com sucesso. Arquivo salvo como: $arquivoPreenchido";
+?>

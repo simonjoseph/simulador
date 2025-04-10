@@ -1,0 +1,48 @@
+<?php
+// Inclua a biblioteca dompdf
+require_once 'vendor/autoload.php';
+
+// Referencie o namespace Dompdf
+use Dompdf\Dompdf;
+use Dompdf\Options;
+
+// Inicialize dompdf
+$options = new Options();
+$options->set('isHtml5ParserEnabled', true);
+$options->set('isRemoteEnabled', true); // Para permitir imagens externas
+$dompdf = new Dompdf($options);
+
+// Dados da apólice (exemplo)
+$dados = [
+    'nome' => 'João da Silva',
+    'matricula' => 'ABC-1234',
+    'marca' => 'Toyota',
+    'modelo' => 'Corolla',
+    'cilindrada' => '2000',
+    'categoria' => 'Automóvel Ligeiro',
+    'ano' => '2022',
+    'rc_legal' => '120.000,00',
+    'comercial_rc' => '90.000,00',
+    'data_actual' => date('d/m/Y')
+];
+
+// Criar o HTML do template
+$html = '
+    <a></a>
+';
+
+// Carregue o HTML no dompdf
+$dompdf->loadHtml($html);
+
+// Defina o tamanho do papel (A4)
+$dompdf->setPaper('A4', 'portrait');
+
+// Renderize o PDF
+$dompdf->render();
+
+// Opcional: saída para o navegador com nome de arquivo específico
+$dompdf->stream("apolice_seguro.pdf", array("Attachment" => false));
+
+// Alternativa: salvar o PDF em um arquivo
+// file_put_contents('apolice_seguro.pdf', $dompdf->output());
+?>

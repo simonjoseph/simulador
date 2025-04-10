@@ -1,3 +1,15 @@
+<?php
+session_start();
+if (isset($_SESSION["success"])) {
+    echo "<div class='alert alert-success' style='text-align: center; background: green; color: #fff;'>" . $_SESSION["success"] . "</div>";
+    unset($_SESSION["success"]);
+}
+if (isset($_SESSION["error"])) {
+    echo "<div class='alert alert-danger'>" . $_SESSION["error"] . "</div>";
+    unset($_SESSION["error"]);
+}
+?>
+
 <!DOCTYPE html>
 <html lang="pt-br">
 
@@ -16,6 +28,306 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 
     <style>
+        /*  */
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+        :root {
+            --primary-color: #2563eb;
+            --primary-light: #3b82f6;
+            --primary-dark: #1d4ed8;
+            --secondary-color: #f8fafc;
+            --accent-color: #06b6d4;
+            --danger-color: #ef4444;
+            --success-color: #10b981;
+            --text-color: #1e293b;
+            /* --text-color: #43b029; */
+            --text-light: #64748b;
+            --border-color: #e2e8f0;
+            /* --background: #f1f5f9; */
+            --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            line-height: 1.7;
+            color: var(--text-color);
+            background-color: var(--background);
+            padding: 30px 20px;
+        }
+
+        .result-container {
+            max-width: 850px;
+            margin: 0 auto;
+            background: linear-gradient(to bottom right, white, var(--secondary-color));
+            border-radius: 16px;
+            box-shadow: var(--card-shadow);
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+
+        .header-pdf {
+            /* background: linear-gradient(135deg, var(--primary-color), var(--primary-dark)); */
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 25px 30px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header-pdf::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(rgba(255, 255, 255, 0.1), transparent 70%);
+            transform: rotate(-45deg);
+            pointer-events: none;
+        }
+
+        .header-pdf h2 {
+            margin: 0;
+            font-weight: 700;
+            font-size: 28px;
+            position: relative;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-pdf p {
+            margin-top: 8px;
+            font-weight: 300;
+            opacity: 0.9;
+            font-size: 16px;
+        }
+
+        .section-pdf {
+            padding: 25px 30px;
+            position: relative;
+            border-bottom: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+
+        .section-pdf:hover {
+            background-color: rgba(255, 255, 255, 0.8);
+        }
+
+        .section-pdf:last-child {
+            border-bottom: none;
+        }
+
+        .section-pdf-icon {
+            width: 36px;
+            height: 36px;
+            background-color: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            position: absolute;
+            top: 20px;
+            left: 30px;
+        }
+
+        .section-pdf-content {
+            padding-left: 50px;
+        }
+
+        h4 {
+            color: var(--primary);
+            margin-bottom: 20px;
+            font-weight: 600;
+            font-size: 20px;
+            display: inline-block;
+            position: relative;
+        }
+
+        h4::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: -5px;
+            width: 50px;
+            height: 3px;
+            /* background: linear-gradient(to right, var(--primary-color), var(--accent-color)); */
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            border-radius: 3px;
+        }
+
+        .grid-container-pdf {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        .result-detail-pdf {
+            display: flex;
+            flex-direction: column;
+            padding: 12px 15px;
+            border-radius: 8px;
+            background-color: white;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+            border: 1px solid var(--border-color);
+        }
+
+        .result-detail-pdf:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .result-label-pdf {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-light);
+            margin-bottom: 5px;
+        }
+
+        .result-value-pdf {
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--text-color);
+        }
+
+        .result-value-pdf:empty::after {
+            content: "—";
+            color: var(--text-light);
+            font-style: italic;
+        }
+
+        .total-section-pdf {
+            background: linear-gradient(to bottom, #f9fafb, #f1f5f9);
+            padding: 30px;
+        }
+
+        .price-details-pdf {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .price-item-pdf {
+            padding: 15px;
+            border-radius: 8px;
+            background-color: white;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border-color);
+        }
+
+        .price-label-pdf {
+            font-size: 14px;
+            color: var(--text-light);
+            margin-bottom: 5px;
+        }
+
+        .price-value-pdf {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .cta-button-pdf {
+            display: block;
+            width: 100%;
+            padding: 14px;
+            margin-top: 25px;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(37, 99, 235, 0.2);
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .cta-button-pdf:hover {
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            /* transform: translateY(-2px);
+      box-shadow: 0 7px 14px rgba(37, 99, 235, 0.25); */
+
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px var(--secondary);
+        }
+
+        .cta-button-pdf:active {
+            transform: translateY(1px);
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result-container {
+            animation: fadeIn 0.6s ease-out forwards;
+        }
+
+        .section-pdf:nth-child(2) {
+            animation-delay: 0.1s;
+        }
+
+        .section-pdf:nth-child(3) {
+            animation-delay: 0.2s;
+        }
+
+        .section-pdf:nth-child(4) {
+            animation-delay: 0.3s;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .header-pdf h2 {
+                font-size: 24px;
+            }
+
+            .grid-container-pdf,
+            .price-details-pdf {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+
+            .section-pdf {
+                padding: 20px;
+            }
+
+            .section-pdf-content {
+                padding-left: 0;
+                margin-top: 20px;
+            }
+
+            .section-pdf-icon {
+                position: static;
+                margin-bottom: 15px;
+            }
+        }
+
+        /*  */
+        /*  */
+        /*  */
+        /*  */
+        /*  */
+        /*  */
         /* Modal Styles */
         .modal {
             display: none;
@@ -30,12 +342,15 @@
         }
 
         .modal-content {
-            background-color: #1e272e;
+            background-color: #00C389;
+            /* background-color: #43b029; */
+            /* background-color: #1e272e; */
             margin: 1% auto;
             padding: 20px;
             border: 1px solid #00c389;
             width: 80%;
-            max-width: 800px;
+            /* max-width: 800px; */
+            max-width: 1000px;
             position: relative;
             border-radius: 10px;
             box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
@@ -408,6 +723,186 @@
 
         /**  */
         /**  */
+        @page {
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+            color: #333;
+            line-height: 1.4;
+            margin: 0;
+            padding: 0;
+        }
+
+        .page-break {
+            page-break-after: always;
+        }
+
+        /* Estilos para a capa */
+        .capa {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        .logo {
+            position: absolute;
+            top: 30px;
+            left: 40px;
+            width: 100px;
+        }
+
+        .faixas-verdes {
+            position: absolute;
+            top: 220px;
+            left: 0;
+            width: 100%;
+            height: 40px;
+            background-image: linear-gradient(to bottom,
+                    #4D9F50 0px, #4D9F50 8px,
+                    #0A8754 8px, #0A8754 16px,
+                    #00A786 16px, #00A786 24px,
+                    #00C0A0 24px, #00C0A0 32px,
+                    #00D5B2 32px, #00D5B2 40px);
+        }
+
+        .texto-capa {
+            position: absolute;
+            top: 290px;
+            left: 40px;
+        }
+
+        .texto-capa h1 {
+            font-size: 14px;
+            margin: 0 0 5px 0;
+            color: #333;
+            font-weight: normal;
+        }
+
+        .texto-capa h2 {
+            font-size: 24px;
+            margin: 0 0 5px 0;
+            color: #000;
+            font-weight: bold;
+        }
+
+        .texto-capa h3 {
+            font-size: 16px;
+            margin: 0;
+            color: #333;
+        }
+
+        .rodape-capa {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 30px;
+            background-color: #4D9F50;
+            display: flex;
+            align-items: center;
+        }
+
+        .contatos {
+            position: absolute;
+            bottom: 30px;
+            left: 0;
+            width: 100%;
+            height: 20px;
+            background-color: #f5f5f5;
+            padding-left: 25px;
+        }
+
+        .contatos span {
+            font-size: 10px;
+            margin-right: 15px;
+        }
+
+        .redes-sociais {
+            text-align: right;
+            padding-right: 40px;
+        }
+
+        /* Estilos para as páginas de conteúdo */
+        .content-page {
+            padding: 30px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            font-size: 20px;
+            margin: 5px 0;
+        }
+
+        .info-box {
+            border: 1px solid #ccc;
+            margin-bottom: 15px;
+            padding: 10px;
+        }
+
+        .info-box h2 {
+            font-size: 14px;
+            margin: 0 0 5px 0;
+            background-color: #f5f5f5;
+            padding: 5px;
+        }
+
+        .row {
+            display: block;
+            width: 100%;
+            overflow: hidden;
+            margin-bottom: 5px;
+        }
+
+        .col {
+            float: left;
+            width: 48%;
+        }
+
+        .label {
+            font-weight: bold;
+            display: block;
+        }
+
+        .value {
+            display: block;
+            border-bottom: 1px dotted #ccc;
+            padding: 3px 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        table,
+        th,
+        td {
+            border: 1px solid #ccc;
+        }
+
+        th,
+        td {
+            padding: 5px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f5f5f5;
+        }
+
+        .footer {
+            margin-top: 20px;
+            font-size: 10px;
+        }
+
         /**  */
         /**  */
 
@@ -512,7 +1007,7 @@
 
                 <div class="step-3 step-container" id="step3">
                     <div class="form-group">
-                        
+
                     </div>
 
                     <button class="cta-button step-button prev-step">Anterior</button>
@@ -774,7 +1269,12 @@
                         </div>
                         <div class="form-group">
                             <label for="auto-cilindrada">Cilindrada</label>
-                            <input type="text" id="auto-cilindrada" placeholder="Cilindrada do Veículo">
+                            <!-- <input type="text" id="auto-cilindrada" placeholder="Cilindrada do Veículo"> -->
+                            <select id="auto-cilindrada">
+                                <option value="">Selecione a cilindrada do Veículo</option>
+                            </select>
+                            <!-- <input type="number" id="auto-cilindrada" placeholder="Informe a cilindrada" required /> -->
+
                         </div>
                     </div>
 
@@ -834,91 +1334,150 @@
 
                 <div class="step-6 step-container" id="step6">
                     <button class="cta-button step-button prev-step">Anterior</button>
-                    <button class="cta-button" id="calculate-auto">Calcular</button>
-                    <div class="result-container" id="auto-result">
-                        <div>
-                            <h4>Dados do Cliente</h4>
-                            <div class="result-detail">
-                                <span class="result-label">Nome:</span>
-                                <span class="result-value" id="nome_result"></span>
+                    <form id="form-simulacao">
+                        <button type="submit" class="cta-button" id="calculate-auto">Calcular</button>
+                        <!--  -->
+                        <div class="result-container" id="auto-result">
+                            <div class="header-pdf">
+                                <h2>Resultado da Simulação de Seguro</h2>
+                                <p>Detalhes da sua cotação personalizada</p>
                             </div>
-                            <div class="result-detail">
-                                <span class="result-label">Email:</span>
-                                <span class="result-value" id="email_result"></span>
+
+                            <div id="cotation-pdf"></div>
+
+                            <div class="section-pdf">
+                                <div class="section-pdf-icon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                        <circle cx="12" cy="7" r="4"></circle>
+                                    </svg>
+                                </div>
+                                <div class="section-pdf-content">
+                                    <h4>Dados do Cliente</h4>
+                                    <div class="grid-container-pdf">
+                                        <div class="result-detail-pdf">
+                                            <span class="result-label-pdf">Nome</span>
+                                            <span class="result-value-pdf" id="nome_result"></span>
+                                            <input type="hidden" name="nome" id="input_nome">
+                                            <!-- Inputs escondidos preenchidos via JS -->
+                                            <input type="hidden" name="email" id="input_email">
+                                            <input type="hidden" name="nif" id="input_nif">
+                                            <input type="hidden" name="contato" id="input_contato">
+                                            <input type="hidden" name="endereco" id="input_endereco">
+                                            <input type="hidden" name="matricula" id="input_matricula">
+                                            <input type="hidden" name="marca" id="input_marca">
+                                            <input type="hidden" name="modelo" id="input_modelo">
+                                            <input type="hidden" name="cilindrada" id="input_cilindrada">
+                                            <input type="hidden" name="ano_fabrico" id="input_ano_fabrico">
+                                            <input type="hidden" name="data_inicio" id="input_data_inicio">
+                                            <input type="hidden" name="id_categoria" id="input_id_categoria">
+                                            <input type="hidden" name="premio_rc_legal" id="input_premio_rc_legal">
+                                            <input type="hidden" name="premio_comercial_rc" id="input_premio_comercial_rc">
+
+                                            <!-- Aqui vai o conteúdo da sua simulação... -->
+                                        </div>
+                                        <div class="result-detail-pdf">
+                                            <span class="result-label-pdf">Email</span>
+                                            <span class="result-value-pdf" id="email_result"></span>
+                                        </div>
+                                        <div class="result-detail-pdf">
+                                            <span class="result-label-pdf">NIF</span>
+                                            <span class="result-value-pdf" id="nif_result"></span>
+                                        </div>
+                                        <div class="result-detail-pdf">
+                                            <span class="result-label-pdf">Contato</span>
+                                            <span class="result-value-pdf" id="contato_result"></span>
+                                        </div>
+                                        <div class="result-detail-pdf">
+                                            <span class="result-label-pdf">Endereço</span>
+                                            <span class="result-value-pdf" id="endereco_result"></span>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="result-detail">
-                                <span class="result-label">NIF:</span>
-                                <span class="result-value" id="nif_result"></span>
+
+                            <div class="section-pdf">
+                                <div class="section-pdf-icon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <rect x="1" y="3" width="15" height="13"></rect>
+                                        <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon>
+                                        <circle cx="5.5" cy="18.5" r="2.5"></circle>
+                                        <circle cx="18.5" cy="18.5" r="2.5"></circle>
+                                    </svg>
+                                </div>
+                                <div class="section-pdf-content">
+                                    <h4>Dados do Automovél</h4>
+                                    <div class="grid-container-pdf">
+                                        <div class="result-detail-pdf">
+                                            <span class="result-label-pdf">Matricula</span>
+                                            <span class="result-value-pdf" id="matricula_result"></span>
+                                        </div>
+                                        <div class="result-detail-pdf">
+                                            <span class="result-label-pdf">Marca</span>
+                                            <span class="result-value-pdf" id="marca_result"></span>
+                                        </div>
+                                        <div class="result-detail-pdf">
+                                            <span class="result-label-pdf">Modelo</span>
+                                            <span class="result-value-pdf" id="modelo_result"></span>
+                                        </div>
+                                        <div class="result-detail-pdf">
+                                            <span class="result-label-pdf">Cilindrada</span>
+                                            <span class="result-value-pdf" id="cilindrada_result"></span>
+                                        </div>
+                                        <div class="result-detail-pdf">
+                                            <span class="result-label-pdf">Ano de fabrico</span>
+                                            <span class="result-value-pdf" id="ano_result"></span>
+                                        </div>
+                                        <div class="result-detail-pdf">
+                                            <span class="result-label-pdf">Data de inicio</span>
+                                            <span class="result-value-pdf" id="data_result"></span>
+                                        </div>
+                                        <div class="result-detail-pdf">
+                                            <span class="result-label-pdf">Categoria</span>
+                                            <span class="result-value-pdf" id="categoria_result"></span>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="result-detail">
-                                <span class="result-label">Contato:</span>
-                                <span class="result-value" id="contato_result"></span>
-                            </div>
-                            <div class="result-detail">
-                                <span class="result-label">Endereço:</span>
-                                <span class="result-value" id="endereco_result"></span>
+
+                            <div class="section-pdf total-section-pdf">
+                                <div class="section-pdf-icon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <line x1="12" y1="1" x2="12" y2="23"></line>
+                                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                                    </svg>
+                                </div>
+                                <div class="section-pdf-content">
+                                    <h4>Resultado da Simulação</h4>
+                                    <div class="price-details-pdf">
+                                        <div class="price-item-pdf">
+                                            <div class="price-label-pdf">Opção ESSENCIAL (RC)</div>
+                                            <div class="price-value-pdf" id="rc_legal">AOA 0,00</div>
+                                        </div>
+                                        <div class="price-item-pdf">
+                                            <div class="price-label-pdf">Opção ESSENCIAL PLUS (RC+POC)</div>
+                                            <div class="price-value-pdf" id="comercial_rc">AOA 0,00</div>
+                                        </div>
+                                        <!-- <div class="price-item-pdf">
+                                        <div class="price-label-pdf">Prêmio POC</div>
+                                        <div class="price-value-pdf" id="premio_poc">AOA 0,00</div>
+                                    </div>
+                                    <div class="price-item-pdf">
+                                        <div class="price-label-pdf">Prêmio QIV</div>
+                                        <div class="price-value-pdf" id="premio_qiv">AOA 0,00</div>
+                                    </div> -->
+                                    </div>
+                                    <!-- <button id="download-word" class="cta-button-pdf">
+                                        Imprimir a Simulação
+                                    </button> -->
+                                    <button type="button" onclick="baixarPdf()" class="cta-button-pdf">
+                                        Imprimir a Simulação
+                                    </button>
+                                </div>
                             </div>
                         </div>
-
-                        <div>
-                            <h4>Dados do Automovél</h4>
-                            <div class="result-detail">
-                                <span class="result-label">Matricula:</span>
-                                <span class="result-value" id="matricula_result"></span>
-                            </div>
-                            <div class="result-detail">
-                                <span class="result-label">Marca:</span>
-                                <span class="result-value" id="marca_result"></span>
-                            </div>
-                            <div class="result-detail">
-                                <span class="result-label">Modelo:</span>
-                                <span class="result-value" id="modelo_result"></span>
-                            </div>
-                            <div class="result-detail">
-                                <span class="result-label">Cilindrada:</span>
-                                <span class="result-value" id="cilindrada_result"></span>
-                            </div>
-                            <div class="result-detail">
-                                <span class="result-label">Ano de fabrico:</span>
-                                <span class="result-value" id="ano_result"></span>
-                            </div>
-
-                            <div class="result-detail">
-                                <span class="result-label">Data de inicio:</span>
-                                <span class="result-value" id="data_result"></span>
-                            </div>
-
-                            <div class="result-detail">
-                                <span class="result-label">Categoria:</span>
-                                <span class="result-value" id="categoria_result"></span>
-                            </div>
-                        </div>
-
-                        <div>
-                            <h4>Resultado da Simulação</h4>
-                            <div class="result-detail">
-                                <span class="result-label">Prêmio RC Legal:</span>
-                                <span class="result-value" id="rc_legal">AOA 0,00</span>
-                            </div>
-                            <div class="result-detail">
-                                <span class="result-label">Prêmio Comercial RC:</span>
-                                <span class="result-value" id="comercial_rc">AOA 0,00</span>
-                            </div>
-                            <div class="result-detail">
-                                <span class="result-label">Prêmio POC:</span>
-                                <span class="result-value" id="premio_poc">AOA 0,00</span>
-                            </div>
-                            <div class="result-detail">
-                                <span class="result-label">Prêmio QIV:</span>
-                                <span class="result-value" id="premio_qiv">AOA 0,00</span>
-                            </div>
-                            <!-- <div class="result-detail">
-                                <span class="result-label">Total Mensal:</span>
-                                <span class="result-value total-value" id="monthly-total">AOA 0,00</span>
-                            </div> -->
-                            <button id="download-word" class="cta-button">Imprimir a Simulação</button>
-                        </div>
-                    </div>
+                        <!--  -->
+                    </form>
                 </div>
                 <button class="back-button">Voltar</button>
             </div>
@@ -1069,8 +1628,8 @@
 
         // Formato YYYY-MM-DD
         const dataMinima = `${ano}-${mes}-${dia}`;
-        document.getElementById('data').min = dataMinima;
-        document.getElementById('data').value = dataMinima; // Define a data de amanhã como valor padrão
+        document.getElementById('auto-data').min = dataMinima;
+        document.getElementById('auto-data').value = dataMinima; // Define a data de amanhã como valor padrão
 
         function updateSelectOptions(vehicleType) {
             const radiobtnCategory = document.getElementById("radiobtnCategory");
@@ -1102,6 +1661,11 @@
 
                 console.log(optionData);
 
+                // ✅ Atualiza a cilindrada quando o botão é selecionado
+                input.addEventListener("change", () => {
+                    updateCilindradaSelect(optionData.nome);
+                });
+
                 const div = document.createElement("div");
                 div.className = "radio-label";
                 div.style.width = "auto";
@@ -1118,8 +1682,57 @@
                 label.appendChild(input);
                 label.appendChild(div);
                 radiobtnCategory.appendChild(label);
+
+                // 
+                // updateCilindradaSelect(optionData.nome);
+                // 
+            });
+
+        }
+
+        // 
+        function updateCilindradaSelect(optionName) {
+            const cilindradaSelect = document.getElementById("auto-cilindrada");
+            cilindradaSelect.innerHTML = ""; // Limpa as opções
+
+            // Adiciona a opção padrão
+            const defaultOption = document.createElement("option");
+            defaultOption.value = "";
+            defaultOption.textContent = "Selecione a cilindrada do Veículo";
+            cilindradaSelect.appendChild(defaultOption);
+
+            console.log(optionName)
+
+            // Define as opções de cilindrada com base na escolha
+            let options = [];
+            if (optionName.includes("até 100 cc")) {
+                options = ["50 cc", "60 cc", "70 cc", "80 cc", "90 cc", "100 cc"];
+            } else if (optionName.includes("entre 100 e 500 cc")) {
+                options = ["100 cc", "200 cc", "300 cc", "400 cc", "500 cc"];
+            } else if (optionName.includes("acima de 500 cc")) {
+                options = ["500 cc", "600 cc", "700 cc", "800 cc", "900 cc", "1000 cc"];
+            } else if (optionName.includes("Ligeiros até 1.600 cc")) {
+                options = ["1.100 cc", "1.200 cc", "1.300 cc", "1.400 cc", "1.500 cc", "1.600 cc"];
+            } else if (optionName.includes("Ligeiros de 1.600 a 2.500 cc")) {
+                options = ["1.600 cc", "1.700 cc", "1.800 cc", "1.900 cc", "2000 cc", "2100 cc", "2200 cc", "2300 cc", "2400 cc", "2500 cc"];
+            } else if (optionName.includes("Ligeiros acima de 2.500 cc")) {
+                options = ["2.500 cc", "2.600 cc", "2.700 cc", "2.800 cc", "2.900 cc", "3000 cc"];
+            } else if (optionName.includes("até 10T")) {
+                options = ["1T", "2T", "3T", "4T", "5T", "6T", "7T", "8T", "9T", "10T"];
+            } else if (optionName.includes("&gt;10T")) {
+                options = ["10T", "20 T", "30T", "40T", "50T"];
+            }
+
+
+            // Adiciona as opções ao select
+            options.forEach(opt => {
+                const option = document.createElement("option");
+                option.value = opt;
+                option.textContent = opt;
+                cilindradaSelect.appendChild(option);
             });
         }
+        // 
     </script>
 
     <script>
@@ -1185,7 +1798,6 @@
                 const formGroup = input.parentElement;
                 const errorMessage = formGroup.querySelector('.error-message');
                 let isValid = true;
-
                 // Removendo classes de estado
                 formGroup.classList.remove('error', 'success');
 
@@ -1241,7 +1853,6 @@
                 errorMessage.textContent = message;
                 errorMessage.classList.add('visible');
                 formGroup.querySelector('input').classList.add('error');
-
                 // Remove a classe de erro após a animação
                 setTimeout(() => {
                     formGroup.querySelector('input').classList.remove('error');
@@ -1279,7 +1890,6 @@
                     noResults.className = 'no-results';
                     noResults.textContent = 'Nenhuma marca encontrada';
                     dropdown.appendChild(noResults);
-
                     // Opção para criar nova marca
                     if (query.trim() !== '') {
                         const createOption = document.createElement('div');
@@ -1299,7 +1909,6 @@
                         if (brand === selectedValue) {
                             option.classList.add('selected');
                         }
-
                         // Destaca o texto pesquisado
                         if (query) {
                             const regex = new RegExp(`(${escapeRegExp(query)})`, 'gi');
@@ -1307,11 +1916,9 @@
                         } else {
                             option.textContent = brand;
                         }
-
                         option.addEventListener('click', () => {
                             selectBrand(brand);
                         });
-
                         dropdown.appendChild(option);
                     });
                 }
@@ -1325,7 +1932,6 @@
             // Filtra as marcas com base no texto digitado
             function filterBrands(query) {
                 if (!query) return [...brands, ...customBrands];
-
                 query = query.toLowerCase();
                 const allBrands = [...brands, ...customBrands];
                 return allBrands.filter(brand =>
@@ -1337,10 +1943,8 @@
             function selectBrand(brand) {
                 selectedValue = brand;
                 searchInput.value = brand;
-
                 // Atualiza o select original
                 setSelectValue(brand);
-
                 closeDropdown();
             }
 
@@ -1348,7 +1952,6 @@
             function addCustomBrand(brand) {
                 if (!brands.includes(brand) && !customBrands.includes(brand)) {
                     customBrands.push(brand);
-
                     // Adiciona ao select original
                     const option = document.createElement('option');
                     option.value = brand;
@@ -1556,13 +2159,13 @@
             nextStepButtons.forEach(button => {
                 button.addEventListener('click', function() {
                     if (currentStep === 1 && !validateStep('step1')) {
-                        return; // Don't proceed if step 1 is invalid
+                        return;
                     }
                     if (currentStep === 2 && !validateStep('step2')) {
-                        return; // Don't proceed if step 2 is invalid
+                        return;
                     }
                     if (currentStep === 3 && !validateStep('step3')) {
-                        return; // Don't proceed if step 2 is invalid
+                        return;
                     }
 
                     const currentStepElement = document.querySelector(`.step-${currentStep}`);
@@ -1616,8 +2219,6 @@
             document.getElementById('calculate-auto').addEventListener('click', function() {
                 const matricula = document.getElementById('auto-matricula').value;
                 const brand = document.getElementById('auto-marca').value;
-                // const categoria = document.getElementById('auto-categoria').value;
-
                 const radios = document.getElementsByName('auto-categoria');
                 let categoria;
 
@@ -1627,9 +2228,7 @@
                         break;
                     }
                 }
-
                 // alert(categoria)
-
                 const fullName = document.getElementById('full-name').value;
                 const email = document.getElementById('email').value;
                 const nif = document.getElementById('nif').value;
@@ -1640,13 +2239,10 @@
                 const cilindrada = document.getElementById('auto-cilindrada').value;
                 const veiculoYear = document.getElementById('auto-year').value;
                 const data_inicio = document.getElementById('auto-data').value;
-
-
                 // init
                 const cambio = <?= htmlspecialchars($impostos["cambio"]) ?>;
                 const iva = <?= htmlspecialchars($impostos["iva"]) ?> / 100;
                 const fga = <?= htmlspecialchars($impostos["fga"]) ?> / 100;
-
                 // Função para arredondar e formatar para duas casas decimais
                 const formatNumber = (num) => {
                     return (Math.round(num * 100) / 100).toLocaleString('pt-BR', {
@@ -1658,15 +2254,12 @@
                 // console.log(modelo, categoria)
                 const linhaCategoria = optionsTarifas.find(tarifa => tarifa.nome === categoria);
 
-                console.log(linhaCategoria)
-
                 // end
                 document.getElementById('nome_result').textContent = fullName;
                 document.getElementById('email_result').textContent = email;
                 document.getElementById('nif_result').textContent = nif;
                 document.getElementById('contato_result').textContent = contact;
                 document.getElementById('endereco_result').textContent = address;
-
                 document.getElementById('modelo_result').textContent = modelo;
                 document.getElementById('cilindrada_result').textContent = cilindrada;
                 document.getElementById('ano_result').textContent = veiculoYear;
@@ -1676,10 +2269,8 @@
                 document.getElementById('marca_result').textContent = brand;
 
                 /*Resultado simulação*/
-                // rc_legal: formatNumber((0.875 * moto100 * cambio) + (0.875 * moto100 * cambio * iva) + (0.875 * moto100 * cambio * fga)),
                 document.getElementById('rc_legal').textContent = formatNumber((linhaCategoria.premio_rc_legal * cambio) + (linhaCategoria.premio_rc_legal * cambio * iva) + (linhaCategoria.premio_rc_legal * cambio * fga));
 
-                // comercial_rc: formatNumber((0.875 * moto100 * cambio) + (moto100Poc * cambio) + (((0.875 * moto100 * cambio) + (moto100Poc * cambio)) * iva) + (((0.875 * moto100 * cambio) + (moto100Poc * cambio)) * fga)),
                 document.getElementById('comercial_rc').textContent = formatNumber(
                     (linhaCategoria.premio_rc_legal * cambio) +
                     (linhaCategoria.premio_poc * cambio) +
@@ -1688,16 +2279,9 @@
                         ((linhaCategoria.premio_rc_legal * cambio) + (linhaCategoria.premio_poc * cambio)) * fga
                     )
                 );
-                // document.getElementById('rc_legal').textContent = dados[categoria].rc_legal;
-                // document.getElementById('comercial_rc').textContent = dados[categoria].comercial_rc;
-                // document.getElementById('premio_poc').textContent = dados[categoria].premio_poc;
-                // document.getElementById('premio_qiv').textContent = dados[categoria].premio_qiv;
-                // document.getElementById('monthly-total').textContent = 'formatCurrency(monthlyTotal)';
 
                 const select = document.getElementById('auto-categoria');
-                // const categoriaTexto = select.options[select.selectedIndex].text;
                 const categoriaTexto = categoria;
-
 
                 const Totaldados = {
                     nome: document.getElementById('full-name').value,
@@ -1714,36 +2298,10 @@
                     data_inicio: document.getElementById('auto-data').value,
                     rc_legal: document.getElementById('rc_legal').textContent,
                     comercial_rc: document.getElementById('comercial_rc').textContent,
-                    // premio_poc: document.getElementById('premio_poc').textContent,
-                    // premio_qiv: document.getElementById('premio_qiv').textContent,
                     data_actual: dataFormatada
                 };
-
-                gerarWord(Totaldados);
-                // gerarPDF(Totaldados);
-
                 showResults('auto-result');
             });
-
-            // Função para gerar um documento Word
-            async function gerarWord(dados) {
-                // Carregar o arquivo template.docx
-                const response = await fetch("template.docx");
-                const arrayBuffer = await response.arrayBuffer();
-
-                const zip = new PizZip(arrayBuffer);
-                const doc = new window.docxtemplater().loadZip(zip);
-
-                // Substituir os placeholders
-                doc.setData(dados);
-                doc.render();
-
-                // Gerar o documento final
-                const output = doc.getZip().generate({
-                    type: "blob"
-                });
-                saveAs(output, "Simulacao_Seguro_Auto.docx");
-            }
 
             // Event listener for the "Start Simulator" button in the hero section
             const startSimulatorButton = document.getElementById('start-simulator');
@@ -1756,17 +2314,331 @@
             });
         });
 
-        function gerarPDF() {
-            const nome = 'simoa';
-            const idade = 29;
+        let urlredirect;
 
-            // Atualiza o conteúdo HTML para o PDF
-            const conteudo = document.getElementById('auto-result');
-            // conteudo.innerHTML = `<p>Nome: ${nome}</p><p>Idade: ${idade}</p>`;
+        // here
+        document.getElementById("form-simulacao").addEventListener("submit", function(e) {
+            e.preventDefault();
 
-            // Gera o PDF a partir do conteúdo HTML
-            html2pdf().from(conteudo).save();
+            // Preencher os inputs escondidos com os valores dos elementos visuais
+            document.getElementById('input_nome').value = document.getElementById("nome_result").innerText;
+            document.getElementById("input_email").value = document.getElementById("email_result").innerText;
+            document.getElementById("input_nif").value = document.getElementById("nif_result").innerText;
+            document.getElementById("input_contato").value = document.getElementById("contato_result").innerText;
+            document.getElementById("input_endereco").value = document.getElementById("endereco_result").innerText;
+            document.getElementById("input_matricula").value = document.getElementById("matricula_result").innerText;
+            document.getElementById("input_marca").value = document.getElementById("marca_result").innerText;
+            document.getElementById("input_modelo").value = document.getElementById("modelo_result").innerText;
+            document.getElementById("input_cilindrada").value = document.getElementById("cilindrada_result").innerText;
+            document.getElementById("input_ano_fabrico").value = document.getElementById("ano_result").innerText;
+            document.getElementById("input_data_inicio").value = document.getElementById("data_result").innerText;
+            document.getElementById("input_id_categoria").value = document.getElementById("categoria_result").innerText;
+            document.getElementById("input_premio_rc_legal").value = document.getElementById("rc_legal").innerText;
+            document.getElementById("input_premio_comercial_rc").value = document.getElementById("comercial_rc").innerText;
+
+            // Mostrar tela de loading
+            const loadingOverlay = document.createElement('div');
+            loadingOverlay.innerHTML = `
+            <div id="loading-overlay" class="loading-container">
+                <div class="loading-animation">
+                    <div class="car">
+                    <div class="car-body">
+                        <div class="car-top"></div>
+                        <div class="car-bottom"></div>
+                        <div class="car-light"></div>
+                    </div>
+                    <div class="wheel wheel-left">
+                        <div class="wheel-inner"></div>
+                    </div>
+                    <div class="wheel wheel-right">
+                        <div class="wheel-inner"></div>
+                    </div>
+                    </div>
+                    <div class="road">
+                    <div class="line line-1"></div>
+                    <div class="line line-2"></div>
+                    <div class="line line-3"></div>
+                    <div class="line line-4"></div>
+                    </div>
+                    <div class="shield">
+                    <div class="shield-icon"></div>
+                    </div>
+                </div>
+                <div class="status-text" id="status-message">Processando sua simulação de seguro...</div>
+                <div class="progress-container">
+                    <div class="progress-bar" id="progress-bar"></div>
+                </div>
+            </div>`;
+            document.body.appendChild(loadingOverlay);
+
+            // Adicione os estilos para o loading
+            const styleElement = document.createElement('style');
+            styleElement.textContent = `
+            .loading-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 30, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            font-family: 'Arial', sans-serif;
+            }
+            
+            .loading-animation {
+            position: relative;
+            width: 300px;
+            height: 200px;
+            }
+        
+            /* Estilo do carro */
+            .car {
+            position: absolute;
+            width: 120px;
+            height: 50px;
+            top: 100px;
+            left: 90px;
+            z-index: 10;
+            animation: carBounce 1s infinite ease-in-out;
+            }
+            
+            .car-body {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: #00af9e;
+            border-radius: 12px;
+            }
+        
+            .car-top {
+            position: absolute;
+            top: -20px;
+            left: 25px;
+            width: 70px;
+            height: 22px;
+            background: #00af9e;
+            border-radius: 10px 10px 0 0;
+            }
+            
+            .car-bottom {
+            position: absolute;
+            bottom: -5px;
+            width: 100%;
+            height: 10px;
+            background: #0090a0;
+            border-radius: 0 0 5px 5px;
+            }
+        
+            .car-light {
+            position: absolute;
+            top: 10px;
+            right: 5px;
+            width: 10px;
+            height: 6px;
+            background: #ffdd59;
+            border-radius: 3px;
+            box-shadow: 0 0 10px 2px rgba(255, 221, 89, 0.6);
+            animation: lightFlash 1s infinite;
+            }
+        
+            /* Estilo das rodas */
+            .wheel {
+            position: absolute;
+            width: 26px;
+            height: 26px;
+            bottom: -13px;
+            background: #333;
+            border-radius: 50%;
+            animation: wheelRotate 2s infinite linear;
+            }
+            
+            .wheel-left {
+            left: 15px;
+            }
+        
+            .wheel-right {
+            right: 15px;
+            }
+            
+            .wheel-inner {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            top: 7px;
+            left: 7px;
+            background: #666;
+            border-radius: 50%;
+            }
+        
+            /* Estilo da estrada */
+            .road {
+            position: absolute;
+            width: 300px;
+            height: 10px;
+            bottom: 50px;
+            background: #333;
+            border-radius: 3px;
+            }
+            
+            .line {
+            position: absolute;
+            height: 4px;
+            width: 30px;
+            background: #fff;
+            top: 3px;
+            animation: lineMove 1.5s infinite linear;
+            }
+        
+            .line-1 { left: 30px; animation-delay: 0s; }
+            .line-2 { left: 100px; animation-delay: 0.3s; }
+            .line-3 { left: 170px; animation-delay: 0.6s; }
+            .line-4 { left: 240px; animation-delay: 0.9s; }
+            
+            /* Estilo do escudo (símbolo de seguro) */
+            .shield {
+            position: absolute;
+            width: 40px;
+            height: 50px;
+            top: 30px;
+            left: 130px;
+            background: rgba(0, 175, 158, 0.3);
+            border: 2px solid #00af9e;
+            border-radius: 50% 50% 0 50%;
+            transform: rotate(45deg);
+            animation: shieldPulse 2s infinite;
+            }
+        
+            .shield-icon {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            width: 16px;
+            height: 16px;
+            border-right: 3px solid #fff;
+            border-bottom: 3px solid #fff;
+            transform: rotate(45deg);
+            }
+            
+            /* Barra de progresso e texto */
+            .status-text {
+            color: white;
+            font-size: 20px;
+            text-align: center;
+            margin-top: 30px;
+            margin-bottom: 20px;
+            }
+        
+            .progress-container {
+            width: 300px;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            overflow: hidden;
+            }
+            
+            .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #00af9e, #00e5cc);
+            border-radius: 10px;
+            transition: width 0.5s ease;
+            }
+        
+            /* Animações */
+            @keyframes carBounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-3px); }
+            }
+            
+            @keyframes wheelRotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+            }
+            
+            @keyframes lineMove {
+            0% { opacity: 0; transform: translateX(50px); }
+            50% { opacity: 1; }
+            100% { opacity: 0; transform: translateX(-50px); }
+            }
+            
+            @keyframes lightFlash {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+            }
+            
+            @keyframes shieldPulse {
+            0%, 100% { opacity: 0.7; transform: rotate(45deg) scale(1); }
+            50% { opacity: 1; transform: rotate(45deg) scale(1.1); }
+            }`;
+            document.head.appendChild(styleElement);
+
+            // Animar a barra de progresso
+            const messages = [
+                "Processando sua simulação de seguro...",
+                "Calculando coberturas ideais...",
+                "Analisando perfil de risco...",
+                "Preparando documento de cotação...",
+                "Configurando proteção personalizada...",
+                "Finalizando sua simulação de seguro..."
+            ];
+
+            let progress = 0;
+            let messageIndex = 0;
+            const progressBar = document.getElementById('progress-bar');
+            const statusMessage = document.getElementById('status-message');
+
+            const progressInterval = setInterval(() => {
+                progress += 1;
+                progressBar.style.width = `${progress}%`;
+                if (progress % 20 === 0 && messageIndex < messages.length - 1) {
+                    messageIndex++;
+                    statusMessage.textContent = messages[messageIndex];
+                }
+
+                if (progress >= 100) {
+                    clearInterval(progressInterval);
+                }
+            }, 30);
+
+            const formData = new FormData(this);
+
+            fetch("home/create", {
+                    method: "POST",
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        console.log("Dados enviados com sucesso!");
+                        setTimeout(() => {
+                            document.body.removeChild(loadingOverlay);
+                            document.head.removeChild(styleElement);
+                            // window.location.href = data.redirectUrl;
+                            window.open(data.redirectUrl, '_blank');
+                            urlredirect = data.redirectUrl;
+                        }, 2000);
+                    } else {
+                        document.body.removeChild(loadingOverlay);
+                        document.head.removeChild(styleElement);
+                        alert(data.message || "Ocorreu um erro desconhecido.");
+                    }
+                })
+                .catch(error => {
+                    console.error("Erro ao enviar dados:", error);
+                    document.body.removeChild(loadingOverlay);
+                    document.head.removeChild(styleElement);
+                    alert("Ocorreu um erro ao enviar a simulação.");
+                });
+        });
+
+        function baixarPdf(){
+            window.open(urlredirect, '_blank');
         }
+
     </script>
 
 </body>

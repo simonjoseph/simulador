@@ -1,2007 +1,612 @@
-<!DOCTYPE html>
-<html lang="pt-br">
+<?php
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= $title; ?></title>
-    <link rel="stylesheet" href="public/css/style.css">
+// Importar a biblioteca DomPDF
+require_once __DIR__ . '/../../vendor/autoload.php';
 
-    <script src="https://cdn.jsdelivr.net/npm/pizzip@3.1.8/dist/pizzip.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/docxtemplater@3.60.1/build/docxtemplater.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+use Dompdf\Dompdf;
+use Dompdf\Options;
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.4.2/mammoth.browser.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+require_once 'core/Controller.php';
+require_once __DIR__ . '/../Models/Imposto.php';
+require_once __DIR__ . "/../Models/Tarifa.php";
+require_once __DIR__ . "/../Models/CampanhaMarketing.php";
+require_once __DIR__ . "/../Models/Category.php";
+require_once __DIR__ . "/../Models/Simulacao.php";
 
-    <style>
-        /* Modal Styles */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0, 0, 0, 0.7);
-        }
+class HomeController extends Controller
+{
 
-        .modal-content {
-            background-color: #1e272e;
-            margin: 1% auto;
-            padding: 20px;
-            border: 1px solid #00c389;
-            width: 80%;
-            max-width: 800px;
-            position: relative;
-            border-radius: 10px;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
-        }
+    protected $modelo;
+    protected $modeloTarifa;
+    protected $modeloMarketing;
+    protected $modeloCategorias;
+    protected $simulacao;
 
-        .close {
-            color: #fff;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-            cursor: pointer;
-        }
+    public function __construct()
+    {
+        $this->modelo = new Imposto();
+        $this->modeloTarifa = new Tarifa();
+        $this->modeloMarketing = new CampanhaMarketing();
+        $this->modeloCategorias = new Category();
+        $this->simulacao = new Simulacao();
+    }
 
-        .close:hover,
-        .close:focus {
-            color: #00ff88;
-            text-decoration: none;
-            cursor: pointer;
-        }
+    public function index()
+    {
+        $impostos = $this->modelo->listarImpostos();
+        $tarifas = $this->modeloTarifa->listarTarifasPorCategoria();
+        $modeloMarketing = $this->modeloMarketing->listar();
+        $modeloCategorias = $this->modeloCategorias->listar();
 
-        .simulator-form {
-            display: none;
-            /* Hidden by default inside the modal */
-        }
+        // print_r($modeloCategorias);
+        // exit;
+        $data = [
+            "title" => "Bem-vindo ao Simulador",
+            "impostos" => $impostos,
+            "tarifas" => $tarifas,
+            "campanhas" => $modeloMarketing,
+            "modeloCategorias" => $modeloCategorias
+        ];
+        $this->view('home', $data);
+    }
 
-        /* Multi-step Form Styles */
-        .step-container {
-            display: none;
-        }
+    // public function create()
+    // {
+    //     if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["nome"])) {
 
-        .step-container.active {
-            display: block;
-        }
+    //         if (session_status() === PHP_SESSION_NONE) {
+    //             session_start();
+    //         }
 
-        .step-button {
-            margin-top: 1rem;
-            margin-bottom: 1rem;
-        }
+    //         $nome = htmlspecialchars($_POST["nome"], ENT_QUOTES, "UTF-8");
+    //         $email = htmlspecialchars($_POST["email"], ENT_QUOTES, "UTF-8");
+    //         $nif = htmlspecialchars($_POST["nif"], ENT_QUOTES, "UTF-8");
+    //         $contato = htmlspecialchars($_POST["contato"], ENT_QUOTES, "UTF-8");
+    //         $endereco = htmlspecialchars($_POST["endereco"], ENT_QUOTES, "UTF-8");
+    //         $matricula = htmlspecialchars($_POST["matricula"], ENT_QUOTES, "UTF-8");
+    //         $marca = htmlspecialchars($_POST["marca"], ENT_QUOTES, "UTF-8");
+    //         $modelo = htmlspecialchars($_POST["modelo"], ENT_QUOTES, "UTF-8");
+    //         $cilindrada = htmlspecialchars($_POST["cilindrada"], ENT_QUOTES, "UTF-8");
+    //         $ano_fabrico = htmlspecialchars($_POST["ano_fabrico"], ENT_QUOTES, "UTF-8");
+    //         $data_inicio = htmlspecialchars($_POST["data_inicio"], ENT_QUOTES, "UTF-8");
+    //         $id_categoria = htmlspecialchars($_POST["id_categoria"], ENT_QUOTES, "UTF-8");
+    //         $premio_rc_legal = htmlspecialchars($_POST["premio_rc_legal"], ENT_QUOTES, "UTF-8");
+    //         $premio_comercial_rc = htmlspecialchars($_POST["premio_comercial_rc"], ENT_QUOTES, "UTF-8");
 
-        .form-group {
-            margin-bottom: 1rem;
-        }
+    //         $cotacao = $this->gerarCotacaoUnica();
 
-        .form-row {
-            display: flex;
-            gap: 1rem;
-        }
+    //         if (!empty($nome)) {
+    //             $resultado = $this->simulacao->cadastrar(
+    //                 $cotacao,
+    //                 $nome,
+    //                 $email,
+    //                 $nif,
+    //                 $contato,
+    //                 $endereco,
+    //                 $matricula,
+    //                 $marca,
+    //                 $modelo,
+    //                 $cilindrada,
+    //                 $ano_fabrico,
+    //                 $data_inicio,
+    //                 $id_categoria,
+    //                 $premio_rc_legal,
+    //                 $premio_comercial_rc
+    //             );
 
-        .form-row .form-group {
-            flex: 1;
-        }
+    //             if ($resultado) {
+    //                 // header("Location: /simulador/home/baixarPdf?cotacao=$cotacao");
+    //                 // exit;
 
-        /* Error Styles */
-        .form-group.error input,
-        .form-group.error select {
-            border-color: red;
-        }
+    //                 //
+    //                 // Em vez de redirecionar, retornamos um JSON com a URL para o cliente
+    //                 header('Content-Type: application/json');
+    //                 echo json_encode([
+    //                     'success' => true,
+    //                     'cotacao' => $cotacao,
+    //                     'redirectUrl' => "/simulador/home/baixarPdf?cotacao=$cotacao"
+    //                 ]);
+    //                 exit;
+    //                 //
+    //             } else {
+    //                 // $_SESSION["error"] = "Erro ao cadastrar.";
+    //                 // header('Location: /simulador/home');
+    //                 // exit;
 
-        .form-group .error-message {
-            color: red;
-            font-size: 0.8rem;
-            display: none;
-        }
+    //                 header('Content-Type: application/json');
+    //                 echo json_encode([
+    //                     'success' => false,
+    //                     'message' => "Erro ao cadastrar."
+    //                 ]);
+    //                 exit;
+    //             }
+    //         } else {
+    //             // $_SESSION["error"] = "Todos os campos são obrigatórios.";
+    //             // header('Location: /simulador/home');
+    //             // exit;
 
-        .form-group.error .error-message {
-            display: block;
-        }
+    //             header('Content-Type: application/json');
+    //             echo json_encode([
+    //                 'success' => false,
+    //                 'message' => "Todos os campos são obrigatórios."
+    //             ]);
+    //             exit;
+    //         }
+    //     }
 
-        /* see init */
-        /* see end */
-        .step-container {
-            background-color: white;
-            border-radius: 10px;
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
-            width: 100%;
-            /* max-width: 500px; */
-            padding: 30px;
-            transform: translateY(30px);
-            opacity: 0;
-            animation: fadeInUp 0.6s forwards;
-        }
+    //     // Se não for POST
+    //     // http_response_code(405);
+    //     // echo "Método não permitido.";
+    //     http_response_code(405);
+    //     echo json_encode(['success' => false, 'message' => "Método não permitido."]);
+    // }
 
-        @keyframes fadeInUp {
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-            position: relative;
-            opacity: 0;
-            transform: translateX(-20px);
-        }
-
-        .form-group:nth-child(1) {
-            animation: slideIn 0.3s 0.1s forwards;
-        }
-
-        .form-group:nth-child(2) {
-            animation: slideIn 0.3s 0.2s forwards;
-        }
-
-        .form-group:nth-child(3) {
-            animation: slideIn 0.3s 0.3s forwards;
-        }
-
-        .form-group:nth-child(4) {
-            animation: slideIn 0.3s 0.4s forwards;
-        }
-
-        .form-group:nth-child(5) {
-            animation: slideIn 0.3s 0.5s forwards;
-        }
-
-        @keyframes slideIn {
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
-
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: #555;
-            transition: color 0.3s;
-        }
-
-        input {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 6px;
-            font-size: 16px;
-            transition: all 0.3s;
-            outline: none;
-        }
-
-        input:focus {
-            border-color: #6e8efb;
-            box-shadow: 0 0 0 3px rgba(110, 142, 251, 0.2);
-        }
-
-        input.error {
-            border-color: #ff5252;
-            animation: shake 0.3s;
-        }
-
-        @keyframes shake {
-
-            0%,
-            100% {
-                transform: translateX(0);
+    public function create()
+    {
+        if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["nome"])) {
+            if (session_status() === PHP_SESSION_NONE) {
+                session_start();
             }
 
-            25% {
-                transform: translateX(-10px);
-            }
-
-            75% {
-                transform: translateX(10px);
-            }
-        }
-
-        .error-message {
-            color: #ff5252;
-            font-size: 14px;
-            margin-top: 5px;
-            display: none;
-            opacity: 0;
-            transform: translateY(-10px);
-            transition: all 0.3s;
-        }
-
-        .error-message.visible {
-            display: block;
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        /* 
-        .cta-button {
-            display: block;
-            width: 100%;
-            padding: 14px;
-            background: linear-gradient(135deg, #6e8efb, #a777e3);
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            margin-top: 10px;
-            opacity: 0;
-            transform: translateY(20px);
-            animation: buttonFadeIn 0.4s 0.7s forwards;
-        } */
-
-        @keyframes buttonFadeIn {
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .cta-button:active {
-            transform: translateY(1px);
-        }
-
-        .form-group.success label {
-            color: #28a745;
-        }
-
-        .form-group.success input {
-            border-color: #28a745;
-        }
-
-        .form-group.error label {
-            color: #ff5252;
-        }
-
-        .pulse {
-            animation: pulse 1.5s infinite;
-        }
-
-        @keyframes pulse {
-            0% {
-                transform: scale(1);
-            }
-
-            50% {
-                transform: scale(1.05);
-            }
-
-            100% {
-                transform: scale(1);
-            }
-        }
-
-        /* see init */
-        /* .container {
-            width: 100%;
-            max-width: 500px;
-            padding: 30px;
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        } */
-
-        .custom-select-container {
-            position: relative;
-            width: 100%;
-        }
-
-        .select-input {
-            width: 100%;
-            padding: 12px 15px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 16px;
-            transition: all 0.3s;
-            outline: none;
-            cursor: text;
-            z-index: 1000;
-        }
-
-        .select-input:focus {
-            border-color: #4a90e2;
-            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
-        }
-
-        .select-dropdown {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            width: 100%;
-            max-height: 300px;
-            overflow-y: auto;
-            background-color: rgba(0, 0, 0, 0.2);
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-            z-index: 100;
-            display: none;
-            margin-top: 5px;
-        }
-
-        .select-dropdown.active {
-            display: block;
-            animation: fadeIn 0.2s forwards;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .option-item {
-            padding: 10px 15px;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-
-        .option-item:hover {
-            background-color: #f5f7fa;
-        }
-
-        .option-item.selected {
-            background-color: #e8f0fe;
-            color: #4a90e2;
-            font-weight: 500;
-        }
-
-        .no-results {
-            padding: 12px 15px;
-            color: #888;
-            font-style: italic;
-        }
-
-        .create-option {
-            padding: 12px 15px;
-            color: #4a90e2;
-            font-weight: 500;
-            cursor: pointer;
-            background-color: #f0f4ff;
-            border-top: 1px solid #ddd;
-        }
-
-        .create-option:hover {
-            background-color: #e8f0fe;
-        }
-
-        .hidden-select {
-            position: absolute;
-            opacity: 0;
-            height: 0;
-            width: 0;
-            pointer-events: none;
-        }
-
-        /* Scrollbar customization */
-        .select-dropdown::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        .select-dropdown::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 4px;
-        }
-
-        .select-dropdown::-webkit-scrollbar-thumb {
-            background: #c1c1c1;
-            border-radius: 4px;
-        }
-
-        .select-dropdown::-webkit-scrollbar-thumb:hover {
-            background: #a8a8a8;
-        }
-
-        /* see end */
-    </style>
-</head>
-
-<body>
-
-    <section class="hero" id="home">
-        <div id="particles"></div>
-        <h1>Simuladores Tranquilidade</h1>
-        <p>Descubra o melhor seguro para você com nossos simuladores inteligentes. Tecnologia avançada para proteger o
-            que importa.</p>
-        <button class="cta-button" id="start-simulator">Simular Agora</button>
-    </section>
-
-    <section class="simulators" id="simulators">
-        <div class="container">
-            <h2 class="section-title">Nossos Simuladores</h2>
-            <div class="simulators-container">
-                <div class="simulator-card" data-type="auto">
-                    <h3>Seguro Auto</h3>
-                    <p>Proteção completa para seu veículo com as melhores coberturas do mercado.</p>
-                    <button class="cta-button simulator-button">Simular</button>
-                </div>
-
-                <div class="simulator-card" data-type="life">
-                    <h3>Seguro de Vida</h3>
-                    <p>Tranquilidade para você e sua família com coberturas personalizadas.</p>
-                    <button class="cta-button simulator-button">Simular</button>
-                </div>
-
-                <div class="simulator-card" data-type="home">
-                    <h3>Seguro de Viagem</h3>
-                    <p>Proteja seu lar contra imprevistos e conte com assistência 24h.</p>
-                    <button class="cta-button simulator-button">Simular</button>
-                </div>
-            </div>
-        </div>
-    </section>
-    <!-- Modal -->
-    <div id="myModal" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-
-            <!-- Formulário de Simulação Auto -->
-            <div class="simulator-form" id="auto-form">
-                <h3>Simulador de Seguro Auto</h3>
-
-                <div class="step-1 step-container active" id="step1">
-                    <div class="form-group">
-                        <div class="container1">
-                            <label class="radio-container">
-                                <input type="radio" name="vehicle" value="mota" onchange="updateSelectOptions('mota')">
-                                <div class="radio-label">
-                                    <img src="https://cdn-icons-png.flaticon.com/128/2975/2975510.png" alt="Mota">
-                                    <span>Motociclos</span>
-                                </div>
-                            </label>
-
-                            <label class="radio-container">
-                                <input type="radio" name="vehicle" value="ligeiro"
-                                    onchange="updateSelectOptions('ligeiro')">
-                                <div class="radio-label">
-                                    <img src="https://cdn-icons-png.flaticon.com/128/2211/2211392.png" alt="Ligeiro">
-                                    <span>Ligeiro</span>
-                                </div>
-                            </label>
-
-                            <label class="radio-container">
-                                <input type="radio" name="vehicle" value="misto"
-                                    onchange="updateSelectOptions('misto')">
-                                <div class="radio-label">
-                                    <img src="https://cdn-icons-png.flaticon.com/128/2134/2134964.png" alt="Misto">
-                                    <span>Misto</span>
-                                </div>
-                            </label>
-
-                            <label class="radio-container">
-                                <input type="radio" name="vehicle" value="caminhao"
-                                    onchange="updateSelectOptions('caminhao')">
-                                <div class="radio-label">
-                                    <img src="https://cdn-icons-png.flaticon.com/128/8502/8502414.png" alt="Caminhão">
-                                    <span>Caminhão</span>
-                                </div>
-                            </label>
-                        </div>
-                    </div>
-                    <button class="cta-button step-button next-step">Próximo</button>
-                </div>
-
-                <!-- <div class="step-2 step-container" id="step2">
-                    
-                    <div class="form-group">
-                        <label for="auto-categoria">Categoria</label>
-                        <select id="auto-categoria" required>
-                            <option value="">-- Escolha --</option>
-                            <option value="moto100">Motociclos até 100 cc</option>
-                            <option value="moto500">Motociclos entre 100 e 500 cc</option>
-                            <option value="moto500plus">Motociclos acima de 500 cc</option>
-                            <option value="ligeiro1600">Ligeiros até 1.600 cc</option>
-                            <option value="ligeiro2500">Ligeiros de 1.600 a 2.500 cc</option>
-                            <option value="ligeiro2500plus">Ligeiros acima de 2.500 cc</option>
-                            <option value="misto1500">Mistos até 1.500 cc</option>
-                            <option value="misto1500plus">Mistos entre 1.500 e 2.500 cc</option>
-                            <option value="misto2500plus">Mistos acima dos 2.500 cc</option>
-                            <option value="Camionetas">Camionetas / Caminhetas</option>
-                            <option value="Camiao10T">Camião até 10T</option>
-                            <option value="Camiao10Tplus">Camião >10T</option>
-                            <option value="Atrelado3600">Atrelados até 3.600 kgs</option>
-                            <option value="Atrelado3600plus">Atrelados acima dos 3.600 kgs</option>
-                        </select>
-                    </div>
-                    <button class="cta-button step-button prev-step">Anterior</button>
-                    <button class="cta-button step-button next-step">Próximo</button>
-                </div> -->
-
-                <div class="step-2 step-container" id="step2">
-                    <div class="form-group">
-                        <div class="container1" id="radiobtnCategory">
-                        </div>
-                    </div>
-
-                    <button class="cta-button step-button prev-step">Anterior</button>
-                    <button class="cta-button step-button next-step">Próximo</button>
-                </div>
-
-                <div class="step-3 step-container" id="step3">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="auto-matricula">Matricula</label>
-                            <input type="text" id="auto-matricula" placeholder="Ex: LD-00-00">
-                        </div>
-                        <div class="form-group">
-                            <label for="auto-marca">Marca</label>
-                            <!-- <input type="text" id="auto-marca" placeholder="Marca do Veículo"> -->
-
-                            <!-- k -->
-                            <div class="custom-select-container">
-                                <input type="text" id="brand-search" class="select-input" placeholder="Digite para pesquisar uma marca" autocomplete="off">
-                                <div class="select-dropdown" id="brand-dropdown"></div>
-
-                                <!-- Select original (oculto) -->
-                                <select id="auto-marca" class="hidden-select">
-                                    <option value="">-- Escolha --</option>
-                                    <option value="ACESSMAQ">ACESSMAQ</option>
-                                    <option value="Actm">Actm</option>
-                                    <option value="Acura">Acura</option>
-                                    <option value="AGIR-H">AGIR-H</option>
-                                    <option value="AJS">AJS</option>
-                                    <option value="Alfa Romeo">Alfa Romeo</option>
-                                    <option value="Alzaga">Alzaga</option>
-                                    <option value="Apollo">Apollo</option>
-                                    <option value="ARB">ARB</option>
-                                    <option value="Ashok">Ashok</option>
-                                    <option value="Astra">Astra</option>
-                                    <option value="Atrelado">Atrelado</option>
-                                    <option value="Audi">Audi</option>
-                                    <option value="AUREPA">AUREPA</option>
-                                    <option value="Axle flatdeck">Axle flatdeck</option>
-                                    <option value="BADORA">BADORA</option>
-                                    <option value="Baic">Baic</option>
-                                    <option value="Baja">Baja</option>
-                                    <option value="Baldex">Baldex</option>
-                                    <option value="BASHAN">BASHAN</option>
-                                    <option value="Basmaior">Basmaior</option>
-                                    <option value="BAW">BAW</option>
-                                    <option value="Bmw">Bmw</option>
-                                    <option value="BODA">BODA</option>
-                                    <option value="Borgward">Borgward</option>
-                                    <option value="Boxer">Boxer</option>
-                                    <option value="BYD">BYD</option>
-                                    <option value="Cadillac">Cadillac</option>
-                                    <option value="Camc">Camc</option>
-                                    <option value="Case">Case</option>
-                                    <option value="Cat">Cat</option>
-                                    <option value="CFMOTO">CFMOTO</option>
-                                    <option value="Chana">Chana</option>
-                                    <option value="Changan">Changan</option>
-                                    <option value="CHENGHWEN">CHENGHWEN</option>
-                                    <option value="Cherokee">Cherokee</option>
-                                    <option value="Chery">Chery</option>
-                                    <option value="Chevrolet">Chevrolet</option>
-                                    <option value="Chrysler">Chrysler</option>
-                                    <option value="Cimar">Cimar</option>
-                                    <option value="Cimc">Cimc</option>
-                                    <option value="Cimic">Cimic</option>
-                                    <option value="CISFRA">CISFRA</option>
-                                    <option value="Citroen">Citroen</option>
-                                    <option value="Cnhtc">Cnhtc</option>
-                                    <option value="CNJ">CNJ</option>
-                                    <option value="COASTER">COASTER</option>
-                                    <option value="Cocimecam">Cocimecam</option>
-                                    <option value="Cometa">Cometa</option>
-                                    <option value="Commuter">Commuter</option>
-                                    <option value="CSG">CSG</option>
-                                    <option value="Dacia">Dacia</option>
-                                    <option value="Daf">Daf</option>
-                                    <option value="Daihatsu">Daihatsu</option>
-                                    <option value="Daimler">Daimler</option>
-                                    <option value="Dakar">Dakar</option>
-                                    <option value="Dayun">Dayun</option>
-                                    <option value="DELOP">DELOP</option>
-                                    <option value="Dfsk">Dfsk</option>
-                                    <option value="Dodge">Dodge</option>
-                                    <option value="DONG FENG">DONG FENG</option>
-                                    <option value="Ducati">Ducati</option>
-                                    <option value="Dump">Dump</option>
-                                    <option value="Dynapac">Dynapac</option>
-                                    <option value="ELGIN">ELGIN</option>
-                                    <option value="F.X.MEILLER">F.X.MEILLER</option>
-                                    <option value="Facchini">Facchini</option>
-                                    <option value="Faw">Faw</option>
-                                    <option value="FEELY">FEELY</option>
-                                    <option value="Ferrari">Ferrari</option>
-                                    <option value="FH15">FH15</option>
-                                    <option value="Fh4">Fh4</option>
-                                    <option value="Fiat">Fiat</option>
-                                    <option value="Ford">Ford</option>
-                                    <option value="Foton">Foton</option>
-                                    <option value="Fruehauf">Fruehauf</option>
-                                    <option value="FUWA">FUWA</option>
-                                    <option value="Galtrailer">Galtrailer</option>
-                                    <option value="Galucho">Galucho</option>
-                                    <option value="GEELY">GEELY</option>
-                                    <option value="Gmc">Gmc</option>
-                                    <option value="GOLDEN">GOLDEN</option>
-                                    <option value="Golden dragon">Golden dragon</option>
-                                    <option value="GRAND CHEROKEE">GRAND CHEROKEE</option>
-                                    <option value="Great wall">Great wall</option>
-                                    <option value="Grove">Grove</option>
-                                    <option value="GVM">GVM</option>
-                                    <option value="Haima">Haima</option>
-                                    <option value="Hama">Hama</option>
-                                    <option value="Hammer">Hammer</option>
-                                    <option value="Hawtai">Hawtai</option>
-                                    <option value="Henred">Henred</option>
-                                    <option value="HIGER">HIGER</option>
-                                    <option value="Hino">Hino</option>
-                                    <option value="Honda">Honda</option>
-                                    <option value="Hong Yan">Hong Yan</option>
-                                    <option value="HORYONG">HORYONG</option>
-                                    <option value="HOS">HOS</option>
-                                    <option value="Howo">Howo</option>
-                                    <option value="Huangai">Huangai</option>
-                                    <option value="Hyundai">Hyundai</option>
-                                    <option value="Infiniti">Infiniti</option>
-                                    <option value="INFINITY">INFINITY</option>
-                                    <option value="INTERNATIONAL">INTERNATIONAL</option>
-                                    <option value="Invepe">Invepe</option>
-                                    <option value="Isuzu">Isuzu</option>
-                                    <option value="Iveco">Iveco</option>
-                                    <option value="Jac">Jac</option>
-                                    <option value="Jaguar">Jaguar</option>
-                                    <option value="Jeep">Jeep</option>
-                                    <option value="Jetour">Jetour</option>
-                                    <option value="Jiefang">Jiefang</option>
-                                    <option value="Jinbei">Jinbei</option>
-                                    <option value="Jincheng">Jincheng</option>
-                                    <option value="Jmc">Jmc</option>
-                                    <option value="Jog">Jog</option>
-                                    <option value="Joluso">Joluso</option>
-                                    <option value="KAIYI">KAIYI</option>
-                                    <option value="KALELUYA">KALELUYA</option>
-                                    <option value="Kamaz">Kamaz</option>
-                                    <option value="Kawasaki">Kawasaki</option>
-                                    <option value="Kearney">Kearney</option>
-                                    <option value="Keeway">Keeway</option>
-                                    <option value="KENWORTH">KENWORTH</option>
-                                    <option value="Keweseki">Keweseki</option>
-                                    <option value="Kia">Kia</option>
-                                    <option value="KINFAN">KINFAN</option>
-                                    <option value="KINGLONG">KINGLONG</option>
-                                    <option value="Komatsu">Komatsu</option>
-                                    <option value="Krone">Krone</option>
-                                    <option value="KRONORTE">KRONORTE</option>
-                                    <option value="Ktm">Ktm</option>
-                                    <option value="Lamberete">Lamberete</option>
-                                    <option value="Lamborghini">Lamborghini</option>
-                                    <option value="Land rover">Land rover</option>
-                                    <option value="LANDINI">LANDINI</option>
-                                    <option value="Lecinena">Lecinena</option>
-                                    <option value="LECITRAILER">LECITRAILER</option>
-                                    <option value="Leopard">Leopard</option>
-                                    <option value="Lexus">Lexus</option>
-                                    <option value="Lifan">Lifan</option>
-                                    <option value="Lincoln">Lincoln</option>
-                                    <option value="Lingken">Lingken</option>
-                                    <option value="LISTRAILER">LISTRAILER</option>
-                                    <option value="Lohr">Lohr</option>
-                                    <option value="Lufeng">Lufeng</option>
-                                    <option value="MACK">MACK</option>
-                                    <option value="Mahindra">Mahindra</option>
-                                    <option value="Man">Man</option>
-                                    <option value="Maserati">Maserati</option>
-                                    <option value="Maxus">Maxus</option>
-                                    <option value="Mazda">Mazda</option>
-                                    <option value="Mercedes">Mercedes</option>
-                                    <option value="MERLO">MERLO</option>
-                                    <option value="METALESP">METALESP</option>
-                                    <option value="METALOVOUGA">METALOVOUGA</option>
-                                    <option value="MG">MG</option>
-                                    <option value="Mike Bike">Mike Bike</option>
-                                    <option value="Mini">Mini</option>
-                                    <option value="Mitsubishi">Mitsubishi</option>
-                                    <option value="Montenegro">Montenegro</option>
-                                    <option value="MOTOANGOLA">MOTOANGOLA</option>
-                                    <option value="N1 Mars">N1 Mars</option>
-                                    <option value="Nissan">Nissan</option>
-                                    <option value="Noma">Noma</option>
-                                    <option value="Olong">Olong</option>
-                                    <option value="Opel">Opel</option>
-                                    <option value="PEGADO">PEGADO</option>
-                                    <option value="Peugeot">Peugeot</option>
-                                    <option value="Piaggio">Piaggio</option>
-                                    <option value="Porsche">Porsche</option>
-                                    <option value="Porta Maquina">Porta Maquina</option>
-                                    <option value="Randon">Randon</option>
-                                    <option value="Range rover">Range rover</option>
-                                    <option value="RAVO">RAVO</option>
-                                    <option value="Remolque">Remolque</option>
-                                    <option value="Renault">Renault</option>
-                                    <option value="Retroescavadeira">Retroescavadeira</option>
-                                    <option value="Rio Trailer">Rio Trailer</option>
-                                    <option value="RODOLINEA">RODOLINEA</option>
-                                    <option value="Rouco">Rouco</option>
-                                    <option value="SANY">SANY</option>
-                                    <option value="Scania">Scania</option>
-                                    <option value="Seat">Seat</option>
-                                    <option value="Semi Reboque">Semi Reboque</option>
-                                    <option value="Shacman">Shacman</option>
-                                    <option value="SHAN QI">SHAN QI</option>
-                                    <option value="Sinotruck">Sinotruck</option>
-                                    <option value="SINOTRUK HOWO">SINOTRUK HOWO</option>
-                                    <option value="Ssangyong">Ssangyong</option>
-                                    <option value="Steelbro">Steelbro</option>
-                                    <option value="STEYER">STEYER</option>
-                                    <option value="Suzuki">Suzuki</option>
-                                    <option value="TAILOR">TAILOR</option>
-                                    <option value="Tata">Tata</option>
-                                    <option value="Terex">Terex</option>
-                                    <option value="Titan">Titan</option>
-                                    <option value="TLEQUIP TLTES">TLEQUIP TLTES</option>
-                                    <option value="Tonghua">Tonghua</option>
-                                    <option value="Toyota">Toyota</option>
-                                    <option value="Trailer">Trailer</option>
-                                    <option value="TRALLOR">TRALLOR</option>
-                                    <option value="Truck">Truck</option>
-                                    <option value="TVS">TVS</option>
-                                    <option value="Unimog">Unimog</option>
-                                    <option value="URAL">URAL</option>
-                                    <option value="VALART">VALART</option>
-                                    <option value="Venter">Venter</option>
-                                    <option value="Vespa">Vespa</option>
-                                    <option value="Volare">Volare</option>
-                                    <option value="Volkswagen">Volkswagen</option>
-                                    <option value="Volvo">Volvo</option>
-                                    <option value="WABCO">WABCO</option>
-                                    <option value="Wuling">Wuling</option>
-                                    <option value="Xcmg">Xcmg</option>
-                                    <option value="XING YONG">XING YONG</option>
-                                    <option value="YAMAHA">YAMAHA</option>
-                                    <option value="Yamaha 125">Yamaha 125</option>
-                                    <option value="Yamang">Yamang</option>
-                                    <option value="Yaxing">Yaxing</option>
-                                    <option value="YUEJIN">YUEJIN</option>
-                                    <option value="Yutong">Yutong</option>
-                                    <option value="Zenza">Zenza</option>
-                                    <option value="Zoomlion">Zoomlion</option>
-                                    <option value="Zxauto">Zxauto</option>
-                                </select>
-                            </div>
-                            <!--  -->
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="auto-modelo">Modelo</label>
-                            <input type="text" id="auto-modelo" placeholder="Modelo do Veículo">
-                        </div>
-                        <div class="form-group">
-                            <label for="auto-cilindrada">Cilindrada</label>
-                            <input type="text" id="auto-cilindrada" placeholder="Cilindrada do Veículo">
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="auto-year">Ano do Veículo</label>
-                            <input type="text" id="auto-year" pattern="\d{4}" placeholder="AAAA" title="Insira um ano de 4 dígitos">
-                            <!-- <select id="auto-year">
-                                <option value="">Selecione</option>
-                                <option value="2025">2025</option>
-                                <option value="2024">2024</option>
-                                <option value="2023">2023</option>
-                                <option value="2022">2022</option>
-                                <option value="2021">2021</option>
-                                <option value="2020">2020</option>
-                            </select> -->
-                        </div>
-                        <div class="form-group">
-                            <label for="auto-data">Data de Início</label>
-                            <input type="date" id="auto-data" placeholder="Data">
-                        </div>
-                    </div>
-
-                    <button class="cta-button step-button prev-step">Anterior</button>
-                    <button class="cta-button step-button next-step">Próximo</button>
-                </div>
-
-                <div class="step-4 step-container" id="step4">
-                    <div class="form-group">
-                        <label for="full-name">Nome Completo</label>
-                        <input type="text" id="full-name" placeholder="Digite seu nome completo" required>
-                        <span class="error-message">Por favor, preencha o nome completo.</span>
-                    </div>
-                    <div class="form-group">
-                        <label for="email">Email</label>
-                        <input type="email" id="email" placeholder="Digite seu email" required>
-                        <span class="error-message">Por favor, preencha um email válido.</span>
-                    </div>
-                    <div class="form-group">
-                        <label for="nif">NIF</label>
-                        <input type="text" id="nif" placeholder="Digite seu NIF" required>
-                        <span class="error-message">Por favor, preencha um NIF válido (9 dígitos).</span>
-                    </div>
-                    <div class="form-group">
-                        <label for="contact">Contato</label>
-                        <input type="tel" id="contact" placeholder="Digite seu número de telefone" required>
-                        <span class="error-message">Por favor, preencha um número de telefone válido.</span>
-                    </div>
-                    <div class="form-group">
-                        <label for="address">Endereço</label>
-                        <input type="text" id="address" placeholder="Digite seu endereço" required>
-                        <span class="error-message">Por favor, preencha o endereço.</span>
-                    </div>
-                    <button class="cta-button step-button prev-step">Anterior</button>
-                    <button class="cta-button step-button next-step">Próximo</button>
-                </div>
-
-                <div class="step-5 step-container" id="step5">
-                    <button class="cta-button step-button prev-step">Anterior</button>
-                    <button class="cta-button" id="calculate-auto">Calcular</button>
-                    <div class="result-container" id="auto-result">
-                        <div>
-                            <h4>Dados do Cliente</h4>
-                            <div class="result-detail">
-                                <span class="result-label">Nome:</span>
-                                <span class="result-value" id="nome_result"></span>
-                            </div>
-                            <div class="result-detail">
-                                <span class="result-label">Email:</span>
-                                <span class="result-value" id="email_result"></span>
-                            </div>
-                            <div class="result-detail">
-                                <span class="result-label">NIF:</span>
-                                <span class="result-value" id="nif_result"></span>
-                            </div>
-                            <div class="result-detail">
-                                <span class="result-label">Contato:</span>
-                                <span class="result-value" id="contato_result"></span>
-                            </div>
-                            <div class="result-detail">
-                                <span class="result-label">Endereço:</span>
-                                <span class="result-value" id="endereco_result"></span>
-                            </div>
-                        </div>
-
-                        <div>
-                            <h4>Dados do Automovél</h4>
-                            <div class="result-detail">
-                                <span class="result-label">Matricula:</span>
-                                <span class="result-value" id="matricula_result"></span>
-                            </div>
-                            <div class="result-detail">
-                                <span class="result-label">Marca:</span>
-                                <span class="result-value" id="marca_result"></span>
-                            </div>
-                            <div class="result-detail">
-                                <span class="result-label">Modelo:</span>
-                                <span class="result-value" id="modelo_result"></span>
-                            </div>
-                            <div class="result-detail">
-                                <span class="result-label">Cilindrada:</span>
-                                <span class="result-value" id="cilindrada_result"></span>
-                            </div>
-                            <div class="result-detail">
-                                <span class="result-label">Ano de fabrico:</span>
-                                <span class="result-value" id="ano_result"></span>
-                            </div>
-
-                            <div class="result-detail">
-                                <span class="result-label">Data de inicio:</span>
-                                <span class="result-value" id="data_result"></span>
-                            </div>
-
-                            <div class="result-detail">
-                                <span class="result-label">Categoria:</span>
-                                <span class="result-value" id="categoria_result"></span>
-                            </div>
-                        </div>
-
-                        <div>
-                            <h4>Resultado da Simulação</h4>
-                            <div class="result-detail">
-                                <span class="result-label">Prêmio RC Legal:</span>
-                                <span class="result-value" id="rc_legal">AOA 0,00</span>
-                            </div>
-                            <div class="result-detail">
-                                <span class="result-label">Prêmio Comercial RC:</span>
-                                <span class="result-value" id="comercial_rc">AOA 0,00</span>
-                            </div>
-                            <div class="result-detail">
-                                <span class="result-label">Prêmio POC:</span>
-                                <span class="result-value" id="premio_poc">AOA 0,00</span>
-                            </div>
-                            <div class="result-detail">
-                                <span class="result-label">Prêmio QIV:</span>
-                                <span class="result-value" id="premio_qiv">AOA 0,00</span>
-                            </div>
-                            <!-- <div class="result-detail">
-                                <span class="result-label">Total Mensal:</span>
-                                <span class="result-value total-value" id="monthly-total">AOA 0,00</span>
-                            </div> -->
-                            <button id="download-word" class="cta-button">Imprimir a Simulação</button>
-                        </div>
-                    </div>
-                </div>
-                <button class="back-button">Voltar</button>
-            </div>
-
-            <!-- Formulário de Simulação Vida -->
-            <div class="simulator-form" id="life-form">
-                <h3>Simulador de Seguro de Vida</h3>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="life-age">Idade</label>
-                        <input type="number" id="life-age" placeholder="Ex: 35">
-                    </div>
-                    <div class="form-group">
-                        <label for="life-gender">Gênero</label>
-                        <select id="life-gender">
-                            <option value="">Selecione</option>
-                            <option value="male">Masculino</option>
-                            <option value="female">Feminino</option>
-                            <option value="other">Outro</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="coverage-value">Valor da Cobertura (AOA)</label>
-                    <input type="number" id="coverage-value" placeholder="Ex: 100000">
-                </div>
-
-                <div class="form-group">
-                    <label for="life-profile">Perfil de Risco</label>
-                    <select id="life-profile">
-                        <option value="">Selecione</option>
-                        <option value="low">Baixo (Não fumante, sem doenças)</option>
-                        <option value="medium">Médio (Fumante ocasional)</option>
-                        <option value="high">Alto (Fumante, com condições médicas)</option>
-                    </select>
-                </div>
-
-                <button class="cta-button" id="calculate-life">Calcular</button>
-                <button class="back-button">Voltar</button>
-
-                <div class="result-container" id="life-result">
-                    <h4>Resultado da Simulação</h4>
-                    <div class="result-detail">
-                        <span class="result-label">Cobertura por Morte:</span>
-                        <span class="result-value" id="death-value">AOA 0,00</span>
-                    </div>
-                    <div class="result-detail">
-                        <span class="result-label">Cobertura por Invalidez:</span>
-                        <span class="result-value" id="disability-value">AOA 0,00</span>
-                    </div>
-                    <div class="result-detail">
-                        <span class="result-label">Cobertura por Doenças Graves:</span>
-                        <span class="result-value" id="disease-value">AOA 0,00</span>
-                    </div>
-                    <div class="result-detail">
-                        <span class="result-label">Assistência Funeral:</span>
-                        <span class="result-value" id="funeral-value">AOA 0,00</span>
-                    </div>
-                    <div class="result-detail">
-                        <span class="result-label">Total Mensal:</span>
-                        <span class="result-value total-value" id="life-monthly-total">AOA 0,00</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Formulário de Simulação Residencial -->
-            <div class="simulator-form" id="home-form">
-                <h3>Simulador de Seguro de Viagem</h3>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="home-type">Tipo de Imóvel</label>
-                        <select id="home-type">
-                            <option value="">Selecione</option>
-                            <option value="house">Casa</option>
-                            <option value="apartment">Apartamento</option>
-                            <option value="cottage">Chácara</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="home-size">Área (m²)</label>
-                        <input type="number" id="home-size" placeholder="Ex: 100">
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="home-value">Valor do Imóvel (AOA)</label>
-                    <input type="number" id="home-value" placeholder="Ex: 500000">
-                </div>
-
-                <div class="form-group">
-                    <label for="home-coverage">Tipo de Cobertura</label>
-                    <select id="home-coverage">
-                        <option value="">Selecione</option>
-                        <option value="basic">Básica (Incêndio, raio)</option>
-                        <option value="standard">Padrão (Básica + roubo, danos elétricos)</option>
-                        <option value="premium">Premium (Todas as coberturas)</option>
-                    </select>
-                </div>
-
-                <button class="cta-button" id="calculate-home">Calcular</button>
-                <button class="back-button">Voltar</button>
-
-                <div class="result-container" id="home-result">
-                    <h4>Resultado da Simulação</h4>
-                    <div class="result-detail">
-                        <span class="result-label">Cobertura Contra Incêndio:</span>
-                        <span class="result-value" id="fire-value">AOA 0,00</span>
-                    </div>
-                    <div class="result-detail">
-                        <span class="result-label">Cobertura Contra Roubo:</span>
-                        <span class="result-value" id="home-theft-value">AOA 0,00</span>
-                    </div>
-                    <div class="result-detail">
-                        <span class="result-label">Cobertura Contra Danos Elétricos:</span>
-                        <span class="result-value" id="electrical-value">AOA 0,00</span>
-                    </div>
-                    <div class="result-detail">
-                        <span class="result-label">Assistência 24h:</span>
-                        <span class="result-value" id="home-assistance-value">AOA 0,00</span>
-                    </div>
-                    <div class="result-detail">
-                        <span class="result-label">Total Mensal:</span>
-                        <span class="result-value total-value" id="home-monthly-total">AOA 0,00</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- <script src="https://cdn.jsdelivr.net/npm/docx@9.2.0/+esm"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script> -->
-
-    <script>
-        // Definindo a data de amanhã como padrão
-        const hoje = new Date();
-        const amanha = new Date(hoje);
-        amanha.setDate(hoje.getDate() + 1);
-        const ano = amanha.getFullYear();
-        const mes = String(amanha.getMonth() + 1).padStart(2, '0'); // Meses começam do 0
-        const dia = String(amanha.getDate()).padStart(2, '0');
-
-        // Formato YYYY-MM-DD
-        const dataMinima = `${ano}-${mes}-${dia}`;
-        document.getElementById('data').min = dataMinima;
-        document.getElementById('data').value = dataMinima; // Define a data de amanhã como valor padrão
-
-        function updateSelectOptions(vehicleType) {
-            // const select = document.getElementById("auto-categoria");
-            const radiobtnCategory = document.getElementById("radiobtnCategory");
-            // select.innerHTML = ""; // Limpa as opções
-            radiobtnCategory.innerHTML = ""; // Limpa as opções
-
-            const options = {
-                mota: [{
-                        value: "moto100",
-                        text: "Motociclos até 100 cc"
-                    },
-                    {
-                        value: "moto500",
-                        text: "Motociclos entre 100 e 500 cc"
-                    },
-                    {
-                        value: "moto500plus",
-                        text: "Motociclos acima de 500 cc"
-                    }
-                ],
-                ligeiro: [{
-                        value: "ligeiro1600",
-                        text: "Ligeiros até 1.600 cc"
-                    },
-                    {
-                        value: "ligeiro2500",
-                        text: "Ligeiros de 1.600 a 2.500 cc"
-                    },
-                    {
-                        value: "ligeiro2500plus",
-                        text: "Ligeiros acima de 2.500 cc"
-                    }
-                ],
-                misto: [{
-                        value: "misto1500",
-                        text: "Mistos até 1.500 cc"
-                    },
-                    {
-                        value: "misto1500plus",
-                        text: "Mistos entre 1.500 e 2.500 cc"
-                    },
-                    {
-                        value: "misto2500plus",
-                        text: "Mistos acima dos 2.500 cc"
-                    }
-                ],
-                caminhao: [{
-                        value: "Camionetas",
-                        text: "Camionetas / Caminhetas"
-                    },
-                    {
-                        value: "Camiao10T",
-                        text: "Camião até 10T"
-                    },
-                    {
-                        value: "Camiao10Tplus",
-                        text: "Camião >10T"
-                    },
-                    // { value: "Atrelado3600", text: "Atrelados até 3.600 kgs" },
-                    // { value: "Atrelado3600plus", text: "Atrelados acima dos 3.600 kgs" }
-                ]
-            };
-
-            // Adiciona a opção padrão "-- Escolha --"
-            // const defaultOption = document.createElement("option");
-            // defaultOption.value = "";
-            // defaultOption.textContent = "-- Escolha --";
-            // select.appendChild(defaultOption);
-
-            // Adiciona as opções específicas do tipo de veículo selecionado
-            options[vehicleType].forEach(optionData => {
-                const option = document.createElement("option");
-                option.value = optionData.value;
-                option.textContent = optionData.text;
-                // select.appendChild(option);
-
-                // radiobtnCategory.appendChild(option)
-                // k~
-                const label = document.createElement("label");
-                label.className = "radio-container";
-
-                const input = document.createElement("input");
-                input.type = "radio";
-                input.name = "auto-categoria"; // Nome do grupo de botões de rádio
-                input.value = optionData.value;
-                input.required = true;
-
-
-                const div = document.createElement("div");
-                div.className = "radio-label";
-                div.style.width = "auto";
-
-                const img = document.createElement("img");
-                img.src = "https://cdn-icons-png.flaticon.com/128/189/189235.png"; // Supondo que você tenha a URL da imagem em optionData
-                img.alt = optionData.text;
-
-                const span = document.createElement("span");
-                span.textContent = optionData.text;
-
-                div.appendChild(img);
-                div.appendChild(span);
-                label.appendChild(input);
-                label.appendChild(div);
-                radiobtnCategory.appendChild(label);
-                // 
-            });
-        }
-    </script>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const inputs = document.querySelectorAll('input');
-            const nextButton = document.querySelector('.next-step');
-
-            // Adiciona foco ao primeiro campo quando a página carrega
-            setTimeout(() => {
-                document.getElementById('full-name').focus();
-            }, 1000);
-
-            // Validação em tempo real nos campos
-            inputs.forEach(input => {
-                // Evento quando o campo perde o foco
-                input.addEventListener('blur', function() {
-                    validateField(this);
-                });
-
-                // Evento quando o usuário digita
-                input.addEventListener('input', function() {
-                    const formGroup = this.parentElement;
-                    if (formGroup.classList.contains('error')) {
-                        validateField(this);
-                    }
-                });
-
-                // Animação quando o campo recebe foco
-                input.addEventListener('focus', function() {
-                    this.parentElement.querySelector('label').style.color = '#6e8efb';
-                });
-            });
-
-            // Evento de clique no botão próximo
-            nextButton.addEventListener('click', function(e) {
-                e.preventDefault();
-                let isValid = true;
-
-                // Valida todos os campos
-                inputs.forEach(input => {
-                    if (!validateField(input)) {
-                        isValid = false;
-                    }
-                });
-
-                if (isValid) {
-                    // Animação de sucesso
-                    this.classList.add('pulse');
-                    this.textContent = 'Dados Salvos!';
-
-                    setTimeout(() => {
-                        alert('Formulário enviado com sucesso!');
-                        // Aqui poderia redirecionar para o próximo passo
-                    }, 1000);
-                } else {
-                    // Foca no primeiro campo com erro
-                    document.querySelector('.form-group.error input').focus();
-                }
-            });
-
-            // Função para validar campos
-            function validateField(input) {
-                const formGroup = input.parentElement;
-                const errorMessage = formGroup.querySelector('.error-message');
-                let isValid = true;
-
-                // Removendo classes de estado
-                formGroup.classList.remove('error', 'success');
-
-                // Verifica se o campo está vazio
-                if (input.value.trim() === '') {
-                    showError(formGroup, errorMessage, 'Este campo é obrigatório.');
-                    isValid = false;
-                } else {
-                    // Validações específicas por tipo de campo
-                    switch (input.id) {
-                        case 'email':
-                            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                            if (!emailRegex.test(input.value)) {
-                                showError(formGroup, errorMessage, 'Por favor, insira um email válido.');
-                                isValid = false;
-                            }
-                            break;
-                        case 'nif':
-                            const nifRegex = /^\d{9}$/;
-                            if (!nifRegex.test(input.value)) {
-                                showError(formGroup, errorMessage, 'O NIF deve conter 9 dígitos.');
-                                isValid = false;
-                            }
-                            break;
-                        case 'contact':
-                            const phoneRegex = /^\d{9,14}$/;
-                            if (!phoneRegex.test(input.value.replace(/\D/g, ''))) {
-                                showError(formGroup, errorMessage, 'Insira um número de telefone válido.');
-                                isValid = false;
-                            }
-                            break;
-                        case 'full-name':
-                            if (input.value.trim().split(' ').length < 2) {
-                                showError(formGroup, errorMessage, 'Insira seu nome completo.');
-                                isValid = false;
-                            }
-                            break;
-                    }
-                }
-
-                // Se passou em todas as validações
-                if (isValid) {
-                    formGroup.classList.add('success');
-                    errorMessage.classList.remove('visible');
-                }
-
-                return isValid;
-            }
-
-            // Função para mostrar erro
-            function showError(formGroup, errorMessage, message) {
-                formGroup.classList.add('error');
-                errorMessage.textContent = message;
-                errorMessage.classList.add('visible');
-                formGroup.querySelector('input').classList.add('error');
-
-                // Remove a classe de erro após a animação
-                setTimeout(() => {
-                    formGroup.querySelector('input').classList.remove('error');
-                }, 300);
-            }
-        });
-    </script>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Elementos
-            const searchInput = document.getElementById('brand-search');
-            const dropdown = document.getElementById('brand-dropdown');
-            const originalSelect = document.getElementById('auto-marca');
-
-            // Obtém todas as marcas do select original
-            const brands = Array.from(originalSelect.options)
-                .filter(option => option.value !== "") // Remove a opção "-- Escolha --"
-                .map(option => option.value);
-
-            // Lista de marcas adicionadas pelo usuário
-            let customBrands = [];
-
-            // Estado
-            let selectedValue = '';
-            let isDropdownOpen = false;
-
-            // Funções
-            function renderDropdownOptions(options, query = '') {
-                dropdown.innerHTML = '';
-
-                if (options.length === 0) {
-                    // Se não houver resultados
-                    const noResults = document.createElement('div');
-                    noResults.className = 'no-results';
-                    noResults.textContent = 'Nenhuma marca encontrada';
-                    dropdown.appendChild(noResults);
-
-                    // Opção para criar nova marca
-                    if (query.trim() !== '') {
-                        const createOption = document.createElement('div');
-                        createOption.className = 'create-option';
-                        createOption.textContent = `Adicionar "${query}"`;
-                        createOption.addEventListener('click', () => {
-                            selectBrand(query);
-                            addCustomBrand(query);
-                        });
-                        dropdown.appendChild(createOption);
-                    }
-                } else {
-                    // Renderiza as opções encontradas
-                    options.forEach(brand => {
-                        const option = document.createElement('div');
-                        option.className = 'option-item';
-                        if (brand === selectedValue) {
-                            option.classList.add('selected');
-                        }
-
-                        // Destaca o texto pesquisado
-                        if (query) {
-                            const regex = new RegExp(`(${escapeRegExp(query)})`, 'gi');
-                            option.innerHTML = brand.replace(regex, '<strong>$1</strong>');
-                        } else {
-                            option.textContent = brand;
-                        }
-
-                        option.addEventListener('click', () => {
-                            selectBrand(brand);
-                        });
-
-                        dropdown.appendChild(option);
-                    });
-                }
-            }
-
-            // Escapa caracteres especiais para usar em regex
-            function escapeRegExp(string) {
-                return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-            }
-
-            // Filtra as marcas com base no texto digitado
-            function filterBrands(query) {
-                if (!query) return [...brands, ...customBrands];
-
-                query = query.toLowerCase();
-                const allBrands = [...brands, ...customBrands];
-                return allBrands.filter(brand =>
-                    brand.toLowerCase().includes(query)
+            $nome = htmlspecialchars($_POST["nome"], ENT_QUOTES, "UTF-8");
+            $email = htmlspecialchars($_POST["email"], ENT_QUOTES, "UTF-8");
+            $nif = htmlspecialchars($_POST["nif"], ENT_QUOTES, "UTF-8");
+            $contato = htmlspecialchars($_POST["contato"], ENT_QUOTES, "UTF-8");
+            $endereco = htmlspecialchars($_POST["endereco"], ENT_QUOTES, "UTF-8");
+            $matricula = htmlspecialchars($_POST["matricula"], ENT_QUOTES, "UTF-8");
+            $marca = htmlspecialchars($_POST["marca"], ENT_QUOTES, "UTF-8");
+            $modelo = htmlspecialchars($_POST["modelo"], ENT_QUOTES, "UTF-8");
+            $cilindrada = htmlspecialchars($_POST["cilindrada"], ENT_QUOTES, "UTF-8");
+            $ano_fabrico = htmlspecialchars($_POST["ano_fabrico"], ENT_QUOTES, "UTF-8");
+            $data_inicio = htmlspecialchars($_POST["data_inicio"], ENT_QUOTES, "UTF-8");
+            $id_categoria = htmlspecialchars($_POST["id_categoria"], ENT_QUOTES, "UTF-8");
+            $premio_rc_legal = htmlspecialchars($_POST["premio_rc_legal"], ENT_QUOTES, "UTF-8");
+            $premio_comercial_rc = htmlspecialchars($_POST["premio_comercial_rc"], ENT_QUOTES, "UTF-8");
+
+            // Gerar a cotação ANTES de cadastrar
+            $cotacao = $this->gerarCotacaoUnica();
+
+            // Adicionando log para acompanhar o valor da cotação
+            error_log("Cotação gerada: " . $cotacao);
+
+            if (!empty($nome)) {
+                $resultado = $this->simulacao->cadastrar(
+                    $cotacao,  // Passamos a cotação já gerada
+                    $nome,
+                    $email,
+                    $nif,
+                    $contato,
+                    $endereco,
+                    $matricula,
+                    $marca,
+                    $modelo,
+                    $cilindrada,
+                    $ano_fabrico,
+                    $data_inicio,
+                    $id_categoria,
+                    $premio_rc_legal,
+                    $premio_comercial_rc
                 );
+
+                // Verificar qual cotação foi realmente salva
+                $cotacaoSalva = $this->simulacao->obterUltimaCotacao();
+                error_log("Cotação salva no banco: " . $cotacaoSalva);
+
+                if ($resultado) {
+                    // Usar a cotação correta (a que foi realmente salva)
+                    $cotacaoFinal = $cotacaoSalva ?: $cotacao;
+
+                    // Em vez de redirecionar, retornamos um JSON com a URL para o cliente
+                    header('Content-Type: application/json');
+                    echo json_encode([
+                        'success' => true,
+                        'cotacao' => $cotacaoFinal,
+                        'redirectUrl' => "/simulador/home/baixarPdf?cotacao=$cotacaoFinal"
+                    ]);
+                    exit;
+                } else {
+                    header('Content-Type: application/json');
+                    echo json_encode([
+                        'success' => false,
+                        'message' => "Erro ao cadastrar."
+                    ]);
+                    exit;
+                }
+            } else {
+                header('Content-Type: application/json');
+                echo json_encode([
+                    'success' => false,
+                    'message' => "Todos os campos são obrigatórios."
+                ]);
+                exit;
             }
-
-            // Seleciona uma marca
-            function selectBrand(brand) {
-                selectedValue = brand;
-                searchInput.value = brand;
-
-                // Atualiza o select original
-                setSelectValue(brand);
-
-                closeDropdown();
-            }
-
-            // Adiciona uma marca personalizada
-            function addCustomBrand(brand) {
-                if (!brands.includes(brand) && !customBrands.includes(brand)) {
-                    customBrands.push(brand);
-
-                    // Adiciona ao select original
-                    const option = document.createElement('option');
-                    option.value = brand;
-                    option.textContent = brand;
-                    originalSelect.appendChild(option);
-                }
-            }
-
-            // Define o valor no select original
-            function setSelectValue(value) {
-                // Verifica se o valor existe no select
-                let optionExists = false;
-                for (let i = 0; i < originalSelect.options.length; i++) {
-                    if (originalSelect.options[i].value === value) {
-                        originalSelect.selectedIndex = i;
-                        optionExists = true;
-                        break;
-                    }
-                }
-
-                // Se o valor não existir, cria uma nova opção
-                if (!optionExists && value.trim() !== '') {
-                    const option = document.createElement('option');
-                    option.value = value;
-                    option.textContent = value;
-                    originalSelect.appendChild(option);
-                    originalSelect.value = value;
-                }
-
-                // Dispara o evento change para notificar outros scripts
-                const event = new Event('change', {
-                    bubbles: true
-                });
-                originalSelect.dispatchEvent(event);
-            }
-
-            // Abre o dropdown
-            function openDropdown() {
-                if (!isDropdownOpen) {
-                    dropdown.classList.add('active');
-                    isDropdownOpen = true;
-
-                    // Filtra as opções com o texto atual
-                    const filteredBrands = filterBrands(searchInput.value);
-                    renderDropdownOptions(filteredBrands, searchInput.value);
-                }
-            }
-
-            // Fecha o dropdown
-            function closeDropdown() {
-                dropdown.classList.remove('active');
-                isDropdownOpen = false;
-            }
-
-            // Event listeners
-            searchInput.addEventListener('focus', openDropdown);
-
-            searchInput.addEventListener('input', () => {
-                const query = searchInput.value.trim();
-                const filteredBrands = filterBrands(query);
-                renderDropdownOptions(filteredBrands, query);
-
-                if (!isDropdownOpen) {
-                    openDropdown();
-                }
-            });
-
-            // Fecha o dropdown quando clicar fora
-            document.addEventListener('click', (e) => {
-                if (!searchInput.contains(e.target) && !dropdown.contains(e.target)) {
-                    closeDropdown();
-                }
-            });
-
-            // Evita que o clique no dropdown feche o dropdown
-            dropdown.addEventListener('click', (e) => {
-                e.stopPropagation();
-            });
-
-            // Teclas de navegação
-            searchInput.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape') {
-                    closeDropdown();
-                } else if (e.key === 'ArrowDown') {
-                    e.preventDefault();
-                    openDropdown();
-
-                    const firstOption = dropdown.querySelector('.option-item');
-                    if (firstOption) {
-                        firstOption.classList.add('highlighted');
-                    }
-                } else if (e.key === 'Enter') {
-                    e.preventDefault();
-
-                    if (!isDropdownOpen) {
-                        openDropdown();
-                        return;
-                    }
-
-                    const highlightedOption = dropdown.querySelector('.option-item.highlighted');
-                    if (highlightedOption) {
-                        highlightedOption.click();
-                    } else if (searchInput.value.trim() !== '') {
-                        // Se não houver opção destacada, mas o input tiver valor
-                        selectBrand(searchInput.value.trim());
-                        addCustomBrand(searchInput.value.trim());
-                    }
-                }
-            });
-        });
-    </script>
-
-    <script>
-        function formatarData() {
-            // Criar um novo objeto Date para pegar a data atual
-            let hoje = new Date();
-
-            // Array com os nomes dos meses
-            let meses = [
-                "janeiro", "fevereiro", "março", "abril", "maio", "junho",
-                "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"
-            ];
-
-            // Pegar o dia, mês e ano
-            let dia = hoje.getDate();
-            let mes = meses[hoje.getMonth()]; // Usa o mês baseado no índice (0-11)
-            let ano = hoje.getFullYear();
-
-            // Formatar a data como "10 de outubro de 2024"
-            return `${dia} de ${mes} de ${ano}`;
         }
 
-        let dataFormatada = formatarData();
+        // Se não for POST
+        http_response_code(405);
+        echo json_encode(['success' => false, 'message' => "Método não permitido."]);
+    }
+
+    public function baixarPdf()
+    {
+        if (isset($_GET['cotacao'])) {
+            $cotacao = $_GET['cotacao'];
+            $dados = $this->simulacao->buscarPorCotacao($cotacao);
 
 
-        document.addEventListener('DOMContentLoaded', function() {
-            // --- Helper Functions ---
-            function formatCurrency(value) {
-                return new Intl.NumberFormat('pt-BR', {
-                    style: 'currency',
-                    currency: 'BRL'
-                }).format(value);
+            // print_r ($dados);
+            // exit;
+
+            if ($dados) {
+                $this->gerarPDF(
+                    $dados['nome'],
+                    $cotacao,
+                    $dados['email'],
+                    $dados['nif'],
+                    $dados['contato'],
+                    $dados['endereco'],
+                    $dados['matricula'],
+                    $dados['marca'],
+                    $dados['modelo'],
+                    $dados['cilindrada'],
+                    $dados['ano_fabrico'],
+                    $dados['data_inicio'],
+                    $dados['id_categoria'],
+                    $dados['premio_rc_legal'],
+                    $dados['premio_comercial_rc']
+                );
+            } else {
+                echo "Cotação não encontrada.";
             }
-
-            function showForm(formId) {
-                const forms = document.querySelectorAll('.simulator-form');
-                forms.forEach(form => {
-                    form.style.display = 'none';
-                });
-                document.getElementById(formId).style.display = 'block';
-            }
-
-            function showResults(resultId) {
-                document.getElementById(resultId).style.display = 'block';
-            }
-
-            function hideResults() {
-                const results = document.querySelectorAll('.result-container');
-                results.forEach(result => {
-                    result.style.display = 'none';
-                });
-            }
-
-            function resetResults(resultId) {
-                const resultContainer = document.getElementById(resultId);
-                if (resultContainer) {
-                    const resultValues = resultContainer.querySelectorAll('.result-value');
-                    resultValues.forEach(value => {
-                        value.textContent = "AOA 0,00";
-                    });
-                }
-            }
-            // --- Modal Functions ---
-            const modal = document.getElementById('myModal');
-            const modalCloseButton = document.querySelector('.close');
-
-            function openModal() {
-                modal.style.display = 'block';
-            }
-
-            function closeModal() {
-                modal.style.display = 'none';
-            }
-            // --- Form Validation ---
-            function validateStep(stepId) {
-                const step = document.getElementById(stepId);
-                const requiredFields = step.querySelectorAll('input[required], select[required]');
-                let isValid = true;
-
-                requiredFields.forEach(field => {
-                    const formGroup = field.closest('.form-group');
-                    if (field.value.trim() === '') {
-                        formGroup.classList.add('error');
-                        isValid = false;
-                    } else {
-                        formGroup.classList.remove('error');
-                    }
-                });
-
-                return isValid;
-            }
-            // --- Multi-Step Navigation ---
-            let currentStep = 1;
-            const nextStepButtons = document.querySelectorAll('.next-step');
-            nextStepButtons.forEach(button => {
-                button.addEventListener('click', function() {
-                    if (currentStep === 1 && !validateStep('step1')) {
-                        return; // Don't proceed if step 1 is invalid
-                    }
-                    if (currentStep === 2 && !validateStep('step2')) {
-                        return; // Don't proceed if step 2 is invalid
-                    }
-                    if (currentStep === 3 && !validateStep('step3')) {
-                        return; // Don't proceed if step 2 is invalid
-                    }
-
-                    const currentStepElement = document.querySelector(`.step-${currentStep}`);
-                    currentStepElement.classList.remove('active');
-                    currentStep++;
-                    const nextStepElement = document.querySelector(`.step-${currentStep}`);
-                    nextStepElement.classList.add('active');
-                });
-            });
-
-            const prevStepButtons = document.querySelectorAll('.prev-step');
-            prevStepButtons.forEach(button => {
-                button.addEventListener('click', function() {
-                    const currentStepElement = document.querySelector(`.step-${currentStep}`);
-                    currentStepElement.classList.remove('active');
-                    currentStep--;
-                    const prevStepElement = document.querySelector(`.step-${currentStep}`);
-                    prevStepElement.classList.add('active');
-                });
-            });
-
-            // --- Event Listeners ---
-            const simulatorButtons = document.querySelectorAll('.simulator-button');
-            simulatorButtons.forEach(button => {
-                button.addEventListener('click', function() {
-                    const simulatorType = this.closest('.simulator-card').dataset.type;
-                    openModal();
-                    showForm(`${simulatorType}-form`);
-                    hideResults();
-                    resetResults(`${simulatorType}-result`);
-                    // Reset to step 1 when opening a new form
-                    const activeStep = document.querySelector(".step-container.active");
-                    if (activeStep) {
-                        activeStep.classList.remove("active");
-                    }
-                    document.getElementById("step1").classList.add("active");
-                    currentStep = 1;
-                });
-            });
-
-            modalCloseButton.addEventListener('click', closeModal);
-
-            const backButtons = document.querySelectorAll('.back-button');
-            backButtons.forEach(button => {
-                button.addEventListener('click', function() {
-                    closeModal();
-                });
-            });
-
-            // --- Auto Calculator ---
-            document.getElementById('calculate-auto').addEventListener('click', function() {
-                const matricula = document.getElementById('auto-matricula').value;
-                const brand = document.getElementById('auto-marca').value;
-                // const categoria = document.getElementById('auto-categoria').value;
-
-                const radios = document.getElementsByName('auto-categoria');
-                let categoria;
-
-                for (const radio of radios) {
-                    if (radio.checked) {
-                        categoria = radio.value;
-                        break;
-                    }
-                }
-
-                alert(categoria)
-
-                const fullName = document.getElementById('full-name').value;
-                const email = document.getElementById('email').value;
-                const nif = document.getElementById('nif').value;
-                const contact = document.getElementById('contact').value;
-                const address = document.getElementById('address').value;
-
-                const modelo = document.getElementById('auto-modelo').value;
-                const cilindrada = document.getElementById('auto-cilindrada').value;
-                const veiculoYear = document.getElementById('auto-year').value;
-                const data_inicio = document.getElementById('auto-data').value;
-
-
-                // init
-                const cambio = <?= htmlspecialchars($impostos["cambio"]) ?>;
-                const iva = <?= htmlspecialchars($impostos["iva"]) ?> / 100;
-                const fga = <?= htmlspecialchars($impostos["fga"]) ?> / 100;
-
-                const moto100 = 27.50
-                const moto500 = 32.50
-                const moto500plus = 42.50
-                const ligeiro1600 = 45.00
-                const ligeiro2500 = 50.00
-                const ligeiro2500plus = 57.50
-                const misto1500 = 60.00
-                const misto1500plus = 65.00
-                const misto2500plus = 72.50
-                const Camionetas = 95.00
-                const Camiao10T = 110.00
-                const Camiao10Tplus = 150.00
-                const Atrelado3600 = 30.00
-                const Atrelado3600plus = 40.00
-
-                const moto100Poc = 0
-                const moto500Poc = 0
-                const moto500plusPoc = 0
-                const ligeiro1600Poc = 5.00
-                const ligeiro2500Poc = 5.00
-                const ligeiro2500plusPoc = 5.00
-                const misto1500Poc = 7.50
-                const misto1500plusPoc = 7.50
-                const misto2500plusPoc = 7.50
-                const CamionetasPoc = 10.00
-                const Camiao10TPoc = 10.00
-                const Camiao10TplusPoc = 10.00
-                const Atrelado3600Poc = 0
-                const Atrelado3600plusPoc = 0
-
-                // Função para arredondar e formatar para duas casas decimais
-                const formatNumber = (num) => {
-                    return (Math.round(num * 100) / 100).toLocaleString('pt-BR', {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2
-                    });
-                };
-
-                const dados = {
-                    moto100: {
-                        rc_legal: formatNumber((0.875 * moto100 * cambio) + (0.875 * moto100 * cambio * iva) + (0.875 * moto100 * cambio * fga)),
-                        comercial_rc: formatNumber((0.875 * moto100 * cambio) + (moto100Poc * cambio) + (((0.875 * moto100 * cambio) + (moto100Poc * cambio)) * iva) + (((0.875 * moto100 * cambio) + (moto100Poc * cambio)) * fga)),
-                        premio_poc: formatNumber(0),
-                        premio_qiv: formatNumber(0)
-                    },
-                    moto500: {
-                        rc_legal: formatNumber((0.875 * moto500 * cambio) + (0.875 * moto500 * cambio * iva) + (0.875 * moto500 * cambio * fga)),
-                        comercial_rc: formatNumber((0.875 * moto500 * cambio) + (moto500Poc * cambio) + (((0.875 * moto500 * cambio) + (moto500Poc * cambio)) * iva) + (((0.875 * moto500 * cambio) + (moto500Poc * cambio)) * fga)),
-                        premio_poc: formatNumber(0),
-                        premio_qiv: formatNumber(0)
-                    },
-                    moto500plus: {
-                        rc_legal: formatNumber((0.875 * moto500plus * cambio) + (0.875 * moto500plus * cambio * iva) + (0.875 * moto500plus * cambio * fga)),
-                        comercial_rc: formatNumber((0.875 * moto500plus * cambio) + (moto500plusPoc * cambio) + (((0.875 * moto500plus * cambio) + (moto500plusPoc * cambio)) * iva) + (((0.875 * moto500plus * cambio) + (moto500plusPoc * cambio)) * fga)),
-                        premio_poc: formatNumber(0),
-                        premio_qiv: formatNumber(0)
-                    },
-                    ligeiro1600: {
-                        rc_legal: formatNumber((0.875 * ligeiro1600 * cambio) + (0.875 * ligeiro1600 * cambio * iva) + (0.875 * ligeiro1600 * cambio * fga)),
-                        comercial_rc: formatNumber((0.875 * ligeiro1600 * cambio) + (ligeiro1600Poc * cambio) + (((0.875 * ligeiro1600 * cambio) + (ligeiro1600Poc * cambio)) * iva) + (((0.875 * ligeiro1600 * cambio) + (ligeiro1600Poc * cambio)) * fga)),
-                        premio_poc: formatNumber(5.00 * cambio),
-                        premio_qiv: formatNumber(3.50 * cambio)
-                    },
-                    ligeiro2500: {
-                        rc_legal: formatNumber((0.875 * ligeiro2500 * cambio) + (0.875 * ligeiro2500 * cambio * iva) + (0.875 * ligeiro2500 * cambio * fga)),
-                        comercial_rc: formatNumber((0.875 * ligeiro2500 * cambio) + (ligeiro2500Poc * cambio) + (((0.875 * ligeiro2500 * cambio) + (ligeiro2500Poc * cambio)) * iva) + (((0.875 * ligeiro2500 * cambio) + (ligeiro2500Poc * cambio)) * fga)),
-                        premio_poc: formatNumber(5.00 * cambio),
-                        premio_qiv: formatNumber(3.50 * cambio)
-                    },
-                    ligeiro2500plus: {
-                        rc_legal: formatNumber((0.875 * ligeiro2500plus * cambio) + (0.875 * ligeiro2500plus * cambio * iva) + (0.875 * ligeiro2500plus * cambio * fga)),
-                        comercial_rc: formatNumber((0.875 * ligeiro2500plus * cambio) + (ligeiro2500plusPoc * cambio) + (((0.875 * ligeiro2500plus * cambio) + (ligeiro2500plusPoc * cambio)) * iva) + (((0.875 * ligeiro2500plus * cambio) + (ligeiro2500plusPoc * cambio)) * fga)),
-                        premio_poc: formatNumber(5.00 * cambio),
-                        premio_qiv: formatNumber(3.50 * cambio)
-                    },
-                    misto1500: {
-                        rc_legal: formatNumber((0.875 * misto1500 * cambio) + (0.875 * misto1500 * cambio * iva) + (0.875 * misto1500 * cambio * fga)),
-                        comercial_rc: formatNumber((0.875 * misto1500 * cambio) + (misto1500Poc * cambio) + (((0.875 * misto1500 * cambio) + (misto1500Poc * cambio)) * iva) + (((0.875 * misto1500 * cambio) + (misto1500Poc * cambio)) * fga)),
-                        premio_poc: formatNumber(7.50 * cambio),
-                        premio_qiv: formatNumber(6.50 * cambio)
-                    },
-                    misto1500plus: {
-                        rc_legal: formatNumber((0.875 * misto1500plus * cambio) + (0.875 * misto1500plus * cambio * iva) + (0.875 * misto1500plus * cambio * fga)),
-                        comercial_rc: formatNumber((0.875 * misto1500plus * cambio) + (misto1500plusPoc * cambio) + (((0.875 * misto1500plus * cambio) + (misto1500plusPoc * cambio)) * iva) + (((0.875 * misto1500plus * cambio) + (misto1500plusPoc * cambio)) * fga)),
-                        premio_poc: formatNumber(7.50 * cambio),
-                        premio_qiv: formatNumber(6.50 * cambio)
-                    },
-                    misto2500plus: {
-                        rc_legal: formatNumber((0.875 * misto2500plus * cambio + (0.875 * misto2500plus * cambio * iva) + (0.875 * misto2500plus * cambio * fga))),
-                        comercial_rc: formatNumber((0.875 * misto2500plus * cambio) + (misto2500plusPoc * cambio) + (((0.875 * misto2500plus * cambio) + (misto2500plusPoc * cambio)) * iva) + (((0.875 * misto2500plus * cambio) + (misto2500plusPoc * cambio)) * fga)),
-                        premio_poc: formatNumber(7.50 * cambio),
-                        premio_qiv: formatNumber(6.50 * cambio)
-                    },
-                    Camionetas: {
-                        rc_legal: formatNumber((0.875 * Camionetas * cambio) + (0.875 * Camionetas * cambio * iva) + (0.875 * Camionetas * cambio * fga)),
-                        comercial_rc: formatNumber((0.875 * Camionetas * cambio) + (CamionetasPoc * cambio) + (((0.875 * Camionetas * cambio) + (CamionetasPoc * cambio)) * iva) + (((0.875 * Camionetas * cambio) + (CamionetasPoc * cambio)) * fga)),
-                        premio_poc: formatNumber(10.0 * cambio),
-                        premio_qiv: formatNumber(8.50 * cambio)
-                    },
-                    Camiao10T: {
-                        rc_legal: formatNumber((0.875 * Camiao10T * cambio) + (0.875 * Camiao10T * cambio * iva) + (0.875 * Camiao10T * cambio * fga)),
-                        comercial_rc: formatNumber((0.875 * Camiao10T * cambio) + (Camiao10TPoc * cambio) + (((0.875 * Camiao10T * cambio) + (Camiao10TPoc * cambio)) * iva) + (((0.875 * Camiao10T * cambio) + (Camiao10TPoc * cambio)) * fga)),
-                        premio_poc: formatNumber(10.0 * cambio),
-                        premio_qiv: formatNumber(8.50 * cambio)
-                    },
-                    Camiao10Tplus: {
-                        rc_legal: formatNumber((0.875 * Camiao10Tplus * cambio) + (0.875 * Camiao10Tplus * cambio * iva) + (0.875 * Camiao10Tplus * cambio * fga)),
-                        comercial_rc: formatNumber((0.875 * Camiao10Tplus * cambio) + (Camiao10TplusPoc * cambio) + (((0.875 * Camiao10Tplus * cambio) + (Camiao10TplusPoc * cambio)) * iva) + (((0.875 * Camiao10Tplus * cambio) + (Camiao10TplusPoc * cambio)) * fga)),
-                        premio_poc: formatNumber(10.00 * cambio),
-                        premio_qiv: formatNumber(8.50 * cambio)
-                    },
-                    Atrelado3600: {
-                        rc_legal: formatNumber((0.875 * Atrelado3600 * cambio) + (0.875 * Atrelado3600 * cambio * iva) + (0.875 * Atrelado3600 * cambio * fga)),
-                        comercial_rc: formatNumber((0.875 * Atrelado3600 * cambio) + (Atrelado3600Poc * cambio) + (((0.875 * Atrelado3600 * cambio) + (Atrelado3600Poc * cambio)) * iva) + (((0.875 * Atrelado3600 * cambio) + (Atrelado3600Poc * cambio)) * fga)),
-                        premio_poc: formatNumber(0),
-                        premio_qiv: formatNumber(0)
-                    },
-                    Atrelado3600plus: {
-                        rc_legal: formatNumber((0.875 * Atrelado3600plus * cambio) + (0.875 * Atrelado3600plus * cambio * iva) + (0.875 * Atrelado3600plus * cambio * fga)),
-                        comercial_rc: formatNumber((0.875 * Atrelado3600plus * cambio) + (Atrelado3600plusPoc * cambio) + (((0.875 * Atrelado3600plus * cambio) + (Atrelado3600plusPoc * cambio)) * iva) + (((0.875 * Atrelado3600plus * cambio) + (Atrelado3600plusPoc * cambio)) * fga)),
-                        premio_poc: formatNumber(0),
-                        premio_qiv: formatNumber(0)
-                    }
-                };
-
-                // end
-                document.getElementById('nome_result').textContent = fullName;
-                document.getElementById('email_result').textContent = email;
-                document.getElementById('nif_result').textContent = nif;
-                document.getElementById('contato_result').textContent = contact;
-                document.getElementById('endereco_result').textContent = address;
-
-                document.getElementById('modelo_result').textContent = modelo;
-                document.getElementById('cilindrada_result').textContent = cilindrada;
-                document.getElementById('ano_result').textContent = veiculoYear;
-                document.getElementById('data_result').textContent = data_inicio;
-                document.getElementById('categoria_result').textContent = categoria;
-                document.getElementById('matricula_result').textContent = matricula;
-                document.getElementById('marca_result').textContent = brand;
-
-                /*Resultado simulação*/
-                document.getElementById('rc_legal').textContent = dados[categoria].rc_legal;
-                document.getElementById('comercial_rc').textContent = dados[categoria].comercial_rc;
-                document.getElementById('premio_poc').textContent = dados[categoria].premio_poc;
-                document.getElementById('premio_qiv').textContent = dados[categoria].premio_qiv;
-                // document.getElementById('monthly-total').textContent = 'formatCurrency(monthlyTotal)';
-
-                const select = document.getElementById('auto-categoria');
-                // const categoriaTexto = select.options[select.selectedIndex].text;
-                const categoriaTexto = categoria;
-
-
-                const Totaldados = {
-                    nome: document.getElementById('full-name').value,
-                    email: document.getElementById('email').value,
-                    nif: document.getElementById('nif').value,
-                    contato: document.getElementById('contact').value,
-                    endereco: document.getElementById('address').value,
-                    matricula: document.getElementById('auto-matricula').value,
-                    marca: document.getElementById('auto-marca').value,
-                    modelo: document.getElementById('auto-modelo').value,
-                    cilindrada: document.getElementById('auto-cilindrada').value,
-                    ano: document.getElementById('auto-year').value,
-                    categoria: categoriaTexto,
-                    data_inicio: document.getElementById('auto-data').value,
-                    rc_legal: document.getElementById('rc_legal').textContent,
-                    comercial_rc: document.getElementById('comercial_rc').textContent,
-                    premio_poc: document.getElementById('premio_poc').textContent,
-                    premio_qiv: document.getElementById('premio_qiv').textContent,
-                    data_actual: dataFormatada
-                };
-
-                gerarWord(Totaldados);
-                // gerarPDF(Totaldados);
-
-                showResults('auto-result');
-            });
-
-            // Função para gerar um documento Word
-            async function gerarWord(dados) {
-                // Carregar o arquivo template.docx
-                const response = await fetch("template.docx");
-                const arrayBuffer = await response.arrayBuffer();
-
-                const zip = new PizZip(arrayBuffer);
-                const doc = new window.docxtemplater().loadZip(zip);
-
-                // Substituir os placeholders
-                doc.setData(dados);
-                doc.render();
-
-                // Gerar o documento final
-                const output = doc.getZip().generate({
-                    type: "blob"
-                });
-                saveAs(output, "Simulacao_Seguro_Auto.docx");
-            }
-
-            // --- Life Calculator ---
-            document.getElementById('calculate-life').addEventListener('click', function() {
-                const age = parseInt(document.getElementById('life-age').value) || 0;
-                const gender = document.getElementById('life-gender').value;
-                const coverageValue = parseFloat(document.getElementById('coverage-value').value) || 0;
-                const riskProfile = document.getElementById('life-profile').value;
-
-                let deathValue = coverageValue * 0.001;
-                let disabilityValue = coverageValue * 0.0008;
-                let diseaseValue = coverageValue * 0.0005;
-                let funeralValue = 30;
-
-                if (age > 60) {
-                    deathValue *= 1.2; // Increase if older
-                    disabilityValue *= 1.2;
-                }
-
-                if (riskProfile === 'medium') {
-                    deathValue *= 1.1;
-                } else if (riskProfile === 'high') {
-                    deathValue *= 1.2;
-                    disabilityValue *= 1.1;
-                    diseaseValue *= 1.1;
-                }
-
-                const monthlyTotal = deathValue + disabilityValue + diseaseValue + funeralValue;
-
-                document.getElementById('death-value').textContent = formatCurrency(deathValue);
-                document.getElementById('disability-value').textContent = formatCurrency(disabilityValue);
-                document.getElementById('disease-value').textContent = formatCurrency(diseaseValue);
-                document.getElementById('funeral-value').textContent = formatCurrency(funeralValue);
-                document.getElementById('life-monthly-total').textContent = formatCurrency(monthlyTotal);
-
-                showResults('life-result');
-            });
-
-            // --- Home Calculator ---
-            document.getElementById('calculate-home').addEventListener('click', function() {
-                const homeType = document.getElementById('home-type').value;
-                const homeSize = parseFloat(document.getElementById('home-size').value) || 0;
-                const homeValue = parseFloat(document.getElementById('home-value').value) || 0;
-                const coverage = document.getElementById('home-coverage').value;
-
-                let fireValue = homeValue * 0.0005;
-                let theftValue = homeValue * 0.0003;
-                let electricalValue = homeValue * 0.0002;
-                let assistanceValue = 40;
-
-                if (coverage === 'standard') {
-                    fireValue *= 1.05;
-                    theftValue *= 1.05;
-                } else if (coverage === 'premium') {
-                    fireValue *= 1.1;
-                    theftValue *= 1.1;
-                    electricalValue *= 1.1;
-                }
-
-                const monthlyTotal = fireValue + theftValue + electricalValue + assistanceValue;
-
-                document.getElementById('fire-value').textContent = formatCurrency(fireValue);
-                document.getElementById('home-theft-value').textContent = formatCurrency(theftValue);
-                document.getElementById('electrical-value').textContent = formatCurrency(electricalValue);
-                document.getElementById('home-assistance-value').textContent = formatCurrency(assistanceValue);
-                document.getElementById('home-monthly-total').textContent = formatCurrency(monthlyTotal);
-
-                showResults('home-result');
-            });
-            // Event listener for the "Start Simulator" button in the hero section
-            const startSimulatorButton = document.getElementById('start-simulator');
-            startSimulatorButton.addEventListener('click', function() {
-                // Scroll to the simulators section
-                const simulatorsSection = document.getElementById('simulators');
-                simulatorsSection.scrollIntoView({
-                    behavior: 'smooth'
-                });
-            });
-        });
-
-        function gerarPDF() {
-            const nome = 'simoa';
-            const idade = 29;
-
-            // Atualiza o conteúdo HTML para o PDF
-            const conteudo = document.getElementById('auto-result');
-            // conteudo.innerHTML = `<p>Nome: ${nome}</p><p>Idade: ${idade}</p>`;
-
-            // Gera o PDF a partir do conteúdo HTML
-            html2pdf().from(conteudo).save();
+        } else {
+            echo "Cotação inválida.";
         }
-    </script>
+    }
 
-</body>
+    private function gerarPDF(
+        $nome,
+        $cotacao,
+        $email,
+        $nif,
+        $contato,
+        $endereco,
+        $matricula,
+        $marca,
+        $modelo,
+        $cilindrada,
+        $ano_fabrico,
+        $data_inicio,
+        $id_categoria,
+        $premio_rc_legal,
+        $premio_comercial_rc
+    ) {
+        $options = new Options();
+        $options->set('defaultFont', 'Arial');
+        $options->setIsRemoteEnabled(true);
 
-</html>
+        $dompdf = new Dompdf($options);
+        $hoje = date("d/m/Y");
+
+        $data = new DateTime($data_inicio);
+        $data->modify('+1 year'); // Adiciona um ano
+        $data->modify('-1 day'); // Subtrai um dia
+
+        // $data_final = $data->format('d/m/Y');
+        $data_final = $data->format('Y-m-d');
+
+        $html = '
+            <!DOCTYPE html>
+            <html lang="pt">
+            <head>
+            <meta charset="UTF-8">
+            <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    font-size: 11px;
+                    line-height: 1.4;
+                    color: #333;
+                    max-width: 800px;
+                    margin: 0 auto;
+                    padding: 0px;
+                }
+                .header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    margin-bottom: 20px;
+                }
+                .logo {
+                    color: #00af9e;
+                    font-weight: bold;
+                    font-size: 24px;
+                    line-height: 1;
+                }
+                .logo img {
+                    max-height: 60px;
+                }
+                .title {
+                    text-align: left;
+                    background-color: #f8f8f8;
+                    padding: 10px;
+                    border-radius: 5px;
+                    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+                }
+                .title strong {
+                    font-size: 11px;
+                }
+                .box {
+                    border: 1px solid #ddd;
+                    margin-bottom: 15px;
+                    padding: 0;
+                    border-radius: 5px;
+                    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+                    overflow: hidden;
+                }
+                .section-title {
+                    background-color: #00af9e;
+                    color: white;
+                    font-weight: bold;
+                    padding: 7px 10px;
+                    font-size: 12px;
+                }
+                .section-content {
+                    padding: 10px;
+                }
+                table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    margin: 0;
+                }
+                td, th {
+                    border: 1px solid #ddd;
+                    padding: 7px;
+                    vertical-align: top;
+                }
+                th {
+                    background-color: #f2f2f2;
+                    text-align: left;
+                }
+                .no-border td {
+                    border: none;
+                }
+                .no-border tr:nth-child(even) {
+                    background-color: #f9f9f9;
+                }
+                .footer {
+                    margin-top: 20px;
+                    font-size: 9px;
+                    border-top: 1px solid #ddd;
+                    padding-top: 10px;
+                    color: #666;
+                }
+                .green-box {
+                    background-color: #00af9e;
+                    color: white;
+                    padding: 5px 8px;
+                    font-weight: bold;
+                    display: inline-block;
+                    margin-bottom: 5px;
+                    border-radius: 3px;
+                }
+                .label {
+                    font-weight: bold;
+                    color: #555;
+                    width: 150px;
+                }
+                .value {
+                    color: #333;
+                }
+                .price-highlight {
+                    font-size: 14px;
+                    font-weight: bold;
+                    color: #00af9e;
+                    padding: 5px;
+                    background-color: #f2f2f2;
+                    border-radius: 3px;
+                    margin-top: 5px;
+                }
+                .option-header {
+                    background-color: #f2f2f2;
+                    text-align: center;
+                    font-weight: bold;
+                }
+                .contact-info {
+                    display: flex;
+                    flex-wrap: wrap;
+                    justify-content: space-between;
+                }
+                .contact-item {
+                    margin-bottom: 5px;
+                    flex-basis: 50%;
+                }
+                .validation-note {
+                    font-style: italic;
+                    text-align: center;
+                    margin: 10px 0;
+                    color: #666;
+                }
+            </style>
+            </head>
+            <body>
+    
+            <div class="header">
+                <div class="logo">
+                    <img src="https://tranquilidade.ao/storage/2024/04/2_trq_horizontal_cores_rgb.png" alt="Tranquilidade">
+                </div>
+                <div class="title">
+                    <strong>Simulação de</strong>
+                    <span>Seguro Automóvel</span>
+                    <span>Data: ' . $hoje . '</span>
+                    <span> Cotação nº: ' . $cotacao . ' </span>
+                </div>
+            </div>
+    
+            <div class="box">
+                <div class="section-title">1. TOMADOR DE SEGURO / SEGURADO</div>
+                <div class="section-content">
+                    <table class="no-border">
+                        <tr>
+                            <td class="label">Nome:</td>
+                            <td class="value">' . $nome . '</td>
+                            <td class="label">Contacto:</td>
+                            <td class="value">' . $contato . '</td>
+                        </tr>
+                        <tr>
+                            <td class="label">Morada:</td>
+                            <td class="value">' . $endereco . '</td>
+                            <td class="label">Email:</td>
+                            <td class="value">' . $email . '</td>
+                        </tr>
+                        <tr>
+                            <td class="label">NIF:</td>
+                            <td class="value">' . $nif . '</td>
+                            <td class="label">Modalidade:</td>
+                            <td class="value">Anual</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+    
+            <div class="box">
+                <div class="section-title">2. PERIODO SEGURO</div>
+                <div class="section-content">
+                    <table class="no-border">
+                        <tr>
+                            <td class="label">Data de Início:</td>
+                            <td class="value">' . $data_inicio . '</td>
+                            <td class="label">Data de Vencimento:</td>
+                            <td class="value">' . $data_final . '</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+    
+            <div class="box">
+                <div class="section-title">3. VIATURA(S) SEGURA(S)</div>
+                <div class="section-content">
+                    <table class="no-border">
+                        <tr>
+                            <td class="label">Categoria:</td>
+                            <td class="value">Mistos entre 1.500 e 2.500 cc</td>
+                            <td class="label">Matrícula:</td>
+                            <td class="value">' . $matricula . '</td>
+                        </tr>
+                        <tr>
+                            <td class="label">Modelo:</td>
+                            <td class="value">' . $modelo . '</td>
+                            <td class="label">Cilindrada(cc):</td>
+                            <td class="value">' . $cilindrada . '</td>
+                        </tr>
+                        <tr>
+                            <td class="label">Marca:</td>
+                            <td class="value">' . $marca . '</td>
+                            <td class="label">Ano de Fabrico:</td>
+                            <td class="value">' . $ano_fabrico . '</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+    
+            <div class="box">
+                <div class="section-title">4. COBERTURAS / CAPITAIS / FRANQUIAS</div>
+                <div class="section-content">
+                    <table>
+                        <tr>
+                            <th style="width: 30%;">Cobertura</th>
+                            <th class="option-header">Opção ESSENCIAL<br>(Só RC)</th>
+                            <th class="option-header">Opção ESSENCIAL PLUS<br>(RC + POC)</th>
+                        </tr>
+                        <tr>
+                            <td><strong>RC - Responsabilidade Civil</strong></td>
+                            <td>Conforme decreto 345/10 de 11 de agosto<br><em>Sem Franquia</em></td>
+                            <td>Conforme decreto 345/10 de 11 de agosto<br><em>Sem Franquia</em></td>
+                        </tr>
+                        <tr>
+                            <td><strong>POC - Protecção de Ocupantes (*)</strong></td>
+                            <td style="text-align: center;">—</td>
+                            <td>
+                                <strong>Morte:</strong> 2.500.000,00 AOA<br>
+                                <strong>Despesas de Tratamento / Ocupantes:</strong> 375.000,00 AOA<br>
+                                <strong>Despesas de Tratamento / Condutor:</strong> 500.000,00 AOA
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+    
+            <div class="box">
+                <div class="section-title">5. EXCLUSÕES</div>
+                <div class="section-content">
+                    <p>Aplicáveis as exclusões previstas nas Condições Gerais do Seguro Automóvel da Seguradora.</p>
+                </div>
+            </div>
+    
+            <div class="box">
+                <div class="section-title">6. FRACCIONAMENTO</div>
+                <div class="section-content">
+                    <p><strong>TOTAL (1/2/3/1)</strong></p>
+                    <div class="price-highlight">Opção ESSENCIAL (RC): ' . $premio_rc_legal . ' AOA</div>
+                    <div class="price-highlight">Opção ESSENCIAL PLUS (RC+POC): ' . $premio_comercial_rc . ' AOA</div>
+                </div>
+            </div>
+    
+            <div class="box">
+                <div class="section-title">7. CLAUSULADO APLICÁVEL</div>
+                <div class="section-content">
+                    <p>Aplicáveis as Condições Gerais e Especiais do Seguro Automóvel Uniforme – Tranquilidade Corporação Angolana de Seguros.</p>
+                </div>
+            </div>
+    
+            <div class="box">
+                <div class="section-title">ENTIDADE: TRANQUILIDADE CORPORAÇÃO ANGOLANA DE SEGUROS S.A</div>
+                <div class="section-content">
+                    <p><strong>Conta:</strong> A006 5069 0104 0100 0658 2999 4</p>
+                </div>
+            </div>
+    
+            <div class="validation-note">
+                Esta proposta tem validade de 30 dias a contar da presente data.
+            </div>
+    
+            <div class="footer">
+                <div class="green-box">TRANQUILIDADE – Corporação Angolana de Seguros, S.A.</div>
+                <div class="contact-info">
+                    <span class="contact-item"><strong>Telefones:</strong> +244 936 197 550 / 1 / 2</span>
+                    <span class="contact-item"><strong>WhatsApp:</strong> +244 936 197 550 / 1</span>
+                    <span class="contact-item"><strong>Email:</strong> apoio@tranquilidade.co.ao</span>
+                    <span class="contact-item"><strong>Site:</strong> www.tranquilidade.ao</span>
+                </div>
+                <div style="margin-top: 3px;">
+                    <strong>Endereço:</strong> Rua Marechal Brós Tito, 35 15º Andar, Edifício ESCOM Luanda – Angola
+                </div>
+            </div>
+    
+            </body>
+            </html>
+        ';
+
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4', 'portrait');
+        $dompdf->render();
+
+        // Enviar o PDF diretamente para o navegador
+        $dompdf->stream("simulacao_$cotacao.pdf", ["Attachment" => false]);
+        exit;
+    }
+
+    private function gerarCotacaoUnica()
+    {
+        $timestamp = date("YmdHis"); // Formato: YYYYMMDDHHMMSS
+        $contador = 1;
+
+        $cotacaoUnica = $contador . $timestamp;
+
+        while ($this->simulacao->cotacaoExiste($cotacaoUnica)) {
+            $contador++;
+            $cotacaoUnica = $contador . $timestamp;
+        }
+
+        return $cotacaoUnica;
+        return $cot;
+    }
+}
