@@ -29,11 +29,11 @@ class Simulacao
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    public function cadastrar($cotacao, $nome, $email, $nif, $contato, $endereco, $matricula, $marca, $modelo, $cilindrada, $ano_fabrico, $data_inicio, $id_categoria, $premio_rc_legal, $premio_comercial_rc)
+    public function cadastrar($cotacao, $nome, $email, $nif, $contato, $endereco, $matricula, $marca, $modelo, $cilindrada, $ano_fabrico, $data_inicio, $id_categoria_exist, $id_categoria, $premio_rc_legal, $premio_comercial_rc)
     {
         try {
-            $query = "INSERT INTO " . $this->table_name . " (cotacao, nome, email, nif, contato, endereco, matricula, marca, modelo, cilindrada, ano_fabrico, data_inicio, id_categoria, premio_rc_legal, premio_comercial_rc) 
-                      VALUES (:cotacao, :nome, :email, :nif, :contato, :endereco, :matricula, :marca, :modelo, :cilindrada, :ano_fabrico, :data_inicio, :id_categoria, :premio_rc_legal, :premio_comercial_rc)";
+            $query = "INSERT INTO " . $this->table_name . " (cotacao, nome, email, nif, contato, endereco, matricula, marca, modelo, cilindrada, ano_fabrico, data_inicio, id_categoria, nome_categoria, premio_rc_legal, premio_comercial_rc) 
+                      VALUES (:cotacao, :nome, :email, :nif, :contato, :endereco, :matricula, :marca, :modelo, :cilindrada, :ano_fabrico, :data_inicio, :id_categoria, :nome_categoria, :premio_rc_legal, :premio_comercial_rc)";
 
             $stmt = $this->conn->prepare($query);
             $stmt->bindParam(":cotacao", $cotacao, PDO::PARAM_STR);
@@ -48,7 +48,8 @@ class Simulacao
             $stmt->bindParam(":cilindrada", $cilindrada, PDO::PARAM_STR);
             $stmt->bindParam(":ano_fabrico", $ano_fabrico, PDO::PARAM_STR);
             $stmt->bindParam(":data_inicio", $data_inicio, PDO::PARAM_STR);
-            $stmt->bindParam(":id_categoria", $id_categoria, PDO::PARAM_STR);
+            $stmt->bindParam(":id_categoria", $id_categoria_exist, PDO::PARAM_STR);
+            $stmt->bindParam(":nome_categoria", $id_categoria, PDO::PARAM_STR);
             $stmt->bindParam(":premio_rc_legal", $premio_rc_legal, PDO::PARAM_STR);
             $stmt->bindParam(":premio_comercial_rc", $premio_comercial_rc, PDO::PARAM_STR);
 

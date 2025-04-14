@@ -171,7 +171,7 @@ input[type="radio"] {
     padding: 10px;
     border: 2px solid rgba(0, 168, 255, 0.3);
     border-radius: 10px;
-    width: 100px;
+    /* width: 100px; */
     text-align: center;
     transition: 0.3s;
     /* background-color: #1e272e; */

@@ -24,17 +24,18 @@ class CampanhaMarketingController extends Controller {
             $dataFim = htmlspecialchars($_POST["data_fim"], ENT_QUOTES, "UTF-8");
             $orcamento = htmlspecialchars($_POST["percentagem"], ENT_QUOTES, "UTF-8");
 
-            if (!empty($nome) && !empty($dataInicio) && !empty($dataFim) && !empty($orcamento)) {
+            // if (!empty($nome) && !empty($dataInicio) && !empty($dataFim) && !empty($orcamento)) {
+            if (!empty($nome)) {
                 $resultado = $this->modelo->cadastrar($nome, $dataInicio, $dataFim, $orcamento);
 
                 $_SESSION[$resultado["success"] ? "success" : "error"] = 
                     $resultado["success"] ? "Campanha cadastrada com sucesso!" : "Erro ao cadastrar: " . $resultado["error"];
 
-                header('Location: /simulador/campanha-marketing');
+                header('Location: /simulador/CampanhaMarketing');
                 exit;
             } else {
                 $_SESSION["error"] = "Todos os campos são obrigatórios.";
-                header('Location: /simulador/campanha-marketing');
+                header('Location: /simulador/CampanhaMarketing');
                 exit;
             }
         }

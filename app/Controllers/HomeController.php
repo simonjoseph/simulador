@@ -30,24 +30,49 @@ class HomeController extends Controller
         $this->simulacao = new Simulacao();
     }
 
-    public function index()
-    {
-        $impostos = $this->modelo->listarImpostos();
-        $tarifas = $this->modeloTarifa->listarTarifasPorCategoria();
-        $modeloMarketing = $this->modeloMarketing->listar();
-        $modeloCategorias = $this->modeloCategorias->listar();
+    // public function index()
+    // {
+    //     $impostos = $this->modelo->listarImpostos();
+    //     $tarifas = $this->modeloTarifa->listarTarifasPorCategoria();
+    //     $modeloMarketing = $this->modeloMarketing->listar();
+    //     $modeloCategorias = $this->modeloCategorias->listar();
 
-        // print_r($modeloCategorias);
-        // exit;
-        $data = [
-            "title" => "Bem-vindo ao Simulador",
-            "impostos" => $impostos,
-            "tarifas" => $tarifas,
-            "campanhas" => $modeloMarketing,
-            "modeloCategorias" => $modeloCategorias
-        ];
-        $this->view('home', $data);
-    }
+    //     // print_r($modeloCategorias);
+    //     // exit;
+    //     $data = [
+    //         "title" => "Bem-vindo ao Simulador",
+    //         "impostos" => $impostos,
+    //         "tarifas" => $tarifas,
+    //         "campanhas" => $modeloMarketing,
+    //         "modeloCategorias" => $modeloCategorias
+    //     ];
+    //     $this->view('home', $data);
+    // }
+
+    public function index()
+{
+    $impostos = $this->modelo->listarImpostos();
+    $tarifas = $this->modeloTarifa->listarTarifasPorCategoria();
+    $modeloMarketing = $this->modeloMarketing->listar();
+    $modeloCategorias = $this->modeloCategorias->listar();
+
+    // Filtrar campanhas no intervalo de datas
+    $dataHoje = date('Y-m-d'); // Obtém a data de hoje no formato YYYY-MM-DD
+    $campanhasFiltradas = array_filter($modeloMarketing, function($campanha) use ($dataHoje) {
+        return $campanha['data_inicio'] <= $dataHoje && $campanha['data_fim'] >= $dataHoje;
+    });
+
+    $data = [
+        "title" => "Bem-vindo ao Simulador",
+        "impostos" => $impostos,
+        "tarifas" => $tarifas,
+        "campanhas" => $campanhasFiltradas, // Usar campanhas filtradas
+        "modeloCategorias" => $modeloCategorias
+    ];
+    
+    $this->view('home', $data);
+}
+
 
     public function create()
     {
@@ -71,6 +96,9 @@ class HomeController extends Controller
             $premio_rc_legal = htmlspecialchars($_POST["premio_rc_legal"], ENT_QUOTES, "UTF-8");
             $premio_comercial_rc = htmlspecialchars($_POST["premio_comercial_rc"], ENT_QUOTES, "UTF-8");
 
+
+            $id_categoria_exist = $this->modeloCategorias->verificar_existencia($id_categoria);
+
             // Gerar a cotação ANTES de cadastrar
             $cotacao = $this->gerarCotacaoUnica();
 
@@ -91,6 +119,7 @@ class HomeController extends Controller
                     $cilindrada,
                     $ano_fabrico,
                     $data_inicio,
+                    $id_categoria_exist,
                     $id_categoria,
                     $premio_rc_legal,
                     $premio_comercial_rc
@@ -160,6 +189,7 @@ class HomeController extends Controller
                     $dados['ano_fabrico'],
                     $dados['data_inicio'],
                     $dados['id_categoria'],
+                    $dados['nome_categoria'],
                     $dados['premio_rc_legal'],
                     $dados['premio_comercial_rc']
                 );
@@ -185,6 +215,7 @@ class HomeController extends Controller
         $ano_fabrico,
         $data_inicio,
         $id_categoria,
+        $nome_categoria,
         $premio_rc_legal,
         $premio_comercial_rc
     ) {
@@ -395,7 +426,7 @@ class HomeController extends Controller
                     <table class="no-border">
                         <tr>
                             <td class="label">Categoria:</td>
-                            <td class="value">Mistos entre 1.500 e 2.500 cc</td>
+                            <td class="value">'. $nome_categoria .'</td>
                             <td class="label">Matrícula:</td>
                             <td class="value">' . $matricula . '</td>
                         </tr>
