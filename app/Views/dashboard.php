@@ -1,333 +1,204 @@
+<?php
+session_start();
+
+// Verifica se o usuário está autenticado
+if (empty($_SESSION['user'])) {
+    // Redireciona para a página de login
+    header('Location: /simulador/login');
+    exit;
+}
+
+if (isset($_SESSION["success"])) {
+    echo "<div class='alert alert-success' style='
+    text-align: center;
+    background: green;
+    color: #fff;
+'>" . $_SESSION["success"] . "</div>";
+    unset($_SESSION["success"]);
+}
+if (isset($_SESSION["error"])) {
+    echo "<div class='alert alert-danger'>" . $_SESSION["error"] . "</div>";
+    unset($_SESSION["error"]);
+}
+?>
 <!DOCTYPE html>
 <html lang="pt-br">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard de Gerenciamento de Veículos</title>
+    <title>Dashboard</title>
     <link rel="stylesheet" href="public/css/styles.css">
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Ajuste do tamanho do gráfico de categorias */
+        #categoriasChart {
+            max-width: 800px;
+            max-height: 800px;
+            margin: 0 auto;
+        }
+    </style>
 </head>
 
 <body>
     <div class="container">
         <!-- Sidebar menu -->
-        <div class="sidebar">
-            <div class="logo">
-                <h2>Logo</h2>
-            </div>
-            <div class="menu-item has-submenu active" data-section="categorias">
-                <i class="fas fa-car"></i> Simulador auto
-                <i class="fas fa-chevron-right menu-arrow open"></i>
-            </div>
-            <!-- Submenu for Categorias -->
-            <div class="submenu open">
-                <div class="submenu-item active" data-section="categoria-suv">
-                    <a href="/simulador/carCategory">Categorias dos Carros</a>
-                </div>
-                <div class="submenu-item" data-section="categoria-sedan">
-                    <a href="/simulador/carModel">Modelos dos Carros</a>
-                </div>
-                <div class="submenu-item" data-section="categoria-picape">
-                    <a href="/simulador/imposto">Imposto</a>
-                </div>
-                <div class="submenu-item" data-section="categoria-picape">
-                    <a href="/simulador/category">categoria</a>
-                </div>
-            </div>
-            <div class="menu-item" data-section="modelos">
-                <i class="fas fa-car"></i> Modelos dos Carros
-            </div>
-            <div class="menu-item" data-section="campanhas">
-                 <a classe="menu-item-a"  style=" color: #fff; text-decoration: none; " 
- href="/simulador/CampanhaMarketing"><i class="fas fa-bullhorn"></i> Campanhas de Marketing</a>
-            </div>
-            <div class="menu-item" data-section="imposto">
-                <i class="fas fa-file-invoice-dollar"></i> Imposto
-            </div>
-            <div class="menu-item" data-section="subscritor">
-                <i class="fas fa-users"></i> Subscritor
-            </div>
-            <div class="menu-item" data-section="usuario">
-                <i class="fas fa-user-shield"></i> Usuário
-            </div>
-        </div>
+        <?php include 'includes/sidebar.php'; ?>
 
         <!-- Main content -->
         <div class="main-content">
-            <div class="header">
-                <h1 class="page-title">SUV</h1>
-                <div class="user-info">
-                    <span>Bem-vindo, Admin</span>
-                </div>
-            </div>
+            
+            <?php include 'includes/header.php'; ?>
 
-            <!-- SUV Section -->
-            <div class="content-section active" id="categoria-suv">
-                <div class="card-container">
-                    <div class="card">
-                        <h3 class="card-title">SUV</h3>
-                        <p class="card-content">Veículos utilitários esportivos com maior espaço e capacidade off-road.</p>
-                        <p><strong>Modelos Populares:</strong> Modelo X, RAV4, CR-V</p>
-                    </div>
+            <!-- Gráficos -->
+            <div class="charts-container">
+                <!-- Gráfico de Simulações Auto -->
+                <div class="chart-card">
+                    <h3>Simulações Auto Feitas</h3>
+                    <canvas id="simulacoesChart"></canvas>
                 </div>
-                <button class="btn btn-primary add-button">Adicionar SUV</button>
-            </div>
 
-            <!-- Sedan Section -->
-            <div class="content-section" id="categoria-sedan">
-                <div class="card-container">
-                    <div class="card">
-                        <h3 class="card-title">Sedan</h3>
-                        <p class="card-content">Veículos de passeio com porta-malas separado do compartimento de passageiros.</p>
-                        <p><strong>Modelos Populares:</strong> Modelo Y, Corolla, Civic</p>
-                    </div>
+                <!-- Gráfico de Campanhas de Marketing -->
+                <div class="chart-card">
+                    <h3>Campanhas de Marketing Realizadas</h3>
+                    <canvas id="campanhasChart"></canvas>
                 </div>
-                <button class="btn btn-primary add-button">Adicionar Sedan</button>
-            </div>
 
-            <!-- Hatchback Section -->
-            <div class="content-section" id="categoria-hatchback">
-                <div class="card-container">
-                    <div class="card">
-                        <h3 class="card-title">Hatchback</h3>
-                        <p class="card-content">Veículos compactos com porta-malas integrado ao compartimento de passageiros.</p>
-                        <p><strong>Modelos Populares:</strong> Modelo Z, HB20, Polo</p>
-                    </div>
+                <!-- Gráfico de Categorias -->
+                <div class="chart-card">
+                    <h3>Simulações por Categoria</h3>
+                    <canvas id="categoriasChart"></canvas>
                 </div>
-                <button class="btn btn-primary add-button">Adicionar Hatchback</button>
-            </div>
-
-            <!-- Picape Section -->
-            <div class="content-section" id="categoria-picape">
-                <div class="card-container">
-                    <div class="card">
-                        <h3 class="card-title">Picape</h3>
-                        <p class="card-content">Veículos com caçamba para transporte de carga, ideais para trabalho.</p>
-                        <p><strong>Modelos Populares:</strong> Modelo W, Hilux, Ranger</p>
-                    </div>
-                </div>
-                <button class="btn btn-primary add-button">Adicionar Picape</button>
-            </div>
-
-            <!-- Categorias Section (Original) -->
-            <div class="content-section" id="categorias">
-                <div class="card-container">
-                    <div class="card">
-                        <h3 class="card-title">SUV</h3>
-                        <p class="card-content">Veículos utilitários esportivos com maior espaço e capacidade off-road.</p>
-                    </div>
-                    <div class="card">
-                        <h3 class="card-title">Sedan</h3>
-                        <p class="card-content">Veículos de passeio com porta-malas separado do compartimento de passageiros.</p>
-                    </div>
-                    <div class="card">
-                        <h3 class="card-title">Hatchback</h3>
-                        <p class="card-content">Veículos compactos com porta-malas integrado ao compartimento de passageiros.</p>
-                    </div>
-                    <div class="card">
-                        <h3 class="card-title">Picape</h3>
-                        <p class="card-content">Veículos com caçamba para transporte de carga, ideais para trabalho.</p>
-                    </div>
-                </div>
-                <button class="btn btn-primary add-button">Adicionar Categoria</button>
-            </div>
-
-            <!-- Modelos Section -->
-            <div class="content-section" id="modelos">
-                <div class="table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Nome</th>
-                                <th>Categoria</th>
-                                <th>Ano</th>
-                                <th>Preço</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>Modelo X</td>
-                                <td>SUV</td>
-                                <td>2024</td>
-                                <td>R$ 180.000</td>
-                                <td>
-                                    <button class="btn btn-edit">Editar</button>
-                                    <button class="btn btn-delete">Excluir</button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Modelo Y</td>
-                                <td>Sedan</td>
-                                <td>2023</td>
-                                <td>R$ 120.000</td>
-                                <td>
-                                    <button class="btn btn-edit">Editar</button>
-                                    <button class="btn btn-delete">Excluir</button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Modelo Z</td>
-                                <td>Hatchback</td>
-                                <td>2024</td>
-                                <td>R$ 85.000</td>
-                                <td>
-                                    <button class="btn btn-edit">Editar</button>
-                                    <button class="btn btn-delete">Excluir</button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Modelo W</td>
-                                <td>Picape</td>
-                                <td>2023</td>
-                                <td>R$ 210.000</td>
-                                <td>
-                                    <button class="btn btn-edit">Editar</button>
-                                    <button class="btn btn-delete">Excluir</button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-                <button class="btn btn-primary add-button">Adicionar Modelo</button>
-            </div>
-
-            <!-- Campanhas Section -->
-            <div class="content-section" id="campanhas">
-                <div class="card-container">
-                    <div class="card">
-                        <h3 class="card-title">Promoção de Verão</h3>
-                        <p class="card-content">Descontos especiais em SUVs para a temporada de verão.</p>
-                        <p><strong>Período:</strong> 01/12/2024 - 31/01/2025</p>
-                    </div>
-                    <div class="card">
-                        <h3 class="card-title">Lançamento Modelo Z</h3>
-                        <p class="card-content">Condições especiais para o novo Modelo Z com taxa zero.</p>
-                        <p><strong>Período:</strong> 15/02/2025 - 15/03/2025</p>
-                    </div>
-                </div>
-                <button class="btn btn-primary add-button">Adicionar Campanha</button>
-            </div>
-
-            <!-- Imposto Section -->
-            <div class="content-section" id="imposto">
-                <div class="table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Nome</th>
-                                <th>Percentual</th>
-                                <th>Aplicação</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>IPVA</td>
-                                <td>4%</td>
-                                <td>Anual</td>
-                                <td>
-                                    <button class="btn btn-edit">Editar</button>
-                                    <button class="btn btn-delete">Excluir</button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>IPI</td>
-                                <td>7-25%</td>
-                                <td>Na compra</td>
-                                <td>
-                                    <button class="btn btn-edit">Editar</button>
-                                    <button class="btn btn-delete">Excluir</button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-                <button class="btn btn-primary add-button">Adicionar Imposto</button>
-            </div>
-
-            <!-- Subscritor Section -->
-            <div class="content-section" id="subscritor">
-                <div class="table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Nome</th>
-                                <th>Plano</th>
-                                <th>Data de Início</th>
-                                <th>Status</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>João Silva</td>
-                                <td>Premium</td>
-                                <td>10/01/2025</td>
-                                <td><span class="status status-active">Ativo</span></td>
-                                <td>
-                                    <button class="btn btn-edit">Editar</button>
-                                    <button class="btn btn-delete">Excluir</button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Maria Oliveira</td>
-                                <td>Básico</td>
-                                <td>05/02/2025</td>
-                                <td><span class="status status-active">Ativo</span></td>
-                                <td>
-                                    <button class="btn btn-edit">Editar</button>
-                                    <button class="btn btn-delete">Excluir</button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-                <button class="btn btn-primary add-button">Adicionar Subscritor</button>
-            </div>
-
-            <!-- Usuario Section -->
-            <div class="content-section" id="usuario">
-                <div class="table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Nome</th>
-                                <th>Email</th>
-                                <th>Perfil</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>Admin</td>
-                                <td>admin@sistema.com</td>
-                                <td>Administrador</td>
-                                <td>
-                                    <button class="btn btn-edit">Editar</button>
-                                    <button class="btn btn-delete">Excluir</button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Vendedor</td>
-                                <td>vendas@sistema.com</td>
-                                <td>Vendedor</td>
-                                <td>
-                                    <button class="btn btn-edit">Editar</button>
-                                    <button class="btn btn-delete">Excluir</button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-                <button class="btn btn-primary add-button">Adicionar Usuário</button>
             </div>
         </div>
     </div>
 
-    <script src="public/js/main.js"></script>
+    <script>
+        // Dados para o gráfico de Simulações Auto
+        const simulacoesData = {
+            labels: <?= json_encode(array_column($simulacoesPorMes, 'mes')) ?>,
+            datasets: [{
+                label: 'Simulações',
+                data: <?= json_encode(array_column($simulacoesPorMes, 'total_simulacoes')) ?>,
+                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+            }]
+        };
+
+        // Configuração do gráfico de Simulações Auto
+        const simulacoesConfig = {
+            type: 'bar',
+            data: simulacoesData,
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    title: {
+                        display: true,
+                        text: 'Simulações Auto Feitas'
+                    }
+                }
+            },
+        };
+
+        // Renderizar o gráfico de Simulações Auto
+        const simulacoesChart = new Chart(
+            document.getElementById('simulacoesChart'),
+            simulacoesConfig
+        );
+
+        // Dados para o gráfico de Campanhas de Marketing
+        const campanhasData = {
+            labels: <?= json_encode(array_column($simulacoesPorCampanha, 'campanha')) ?>,
+            datasets: [{
+                label: 'Campanhas',
+                data: <?= json_encode(array_column($simulacoesPorCampanha, 'total_simulacoes')) ?>,
+                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                borderColor: 'rgba(255, 99, 132, 1)',
+                borderWidth: 1
+            }]
+        };
+
+        // Configuração do gráfico de Campanhas de Marketing
+        const campanhasConfig = {
+            type: 'line',
+            data: campanhasData,
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    title: {
+                        display: true,
+                        text: 'Campanhas de Marketing Realizadas'
+                    }
+                }
+            },
+        };
+
+        // Renderizar o gráfico de Campanhas de Marketing
+        const campanhasChart = new Chart(
+            document.getElementById('campanhasChart'),
+            campanhasConfig
+        );
+
+        // Dados para o gráfico de Categorias
+        const categoriasData = {
+            labels: <?= json_encode(array_column($simulacoesPorCategoria, 'categoria')) ?>,
+            datasets: [{
+                label: 'Simulações por Categoria',
+                data: <?= json_encode(array_column($simulacoesPorCategoria, 'total_simulacoes')) ?>,
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.2)',
+                    'rgba(54, 162, 235, 0.2)',
+                    'rgba(255, 206, 86, 0.2)',
+                    'rgba(75, 192, 192, 0.2)',
+                    'rgba(153, 102, 255, 0.2)',
+                    'rgba(255, 159, 64, 0.2)'
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(255, 159, 64, 1)'
+                ],
+                borderWidth: 1
+            }]
+        };
+
+        // Configuração do gráfico de Categorias
+        const categoriasConfig = {
+            type: 'pie',
+            data: categoriasData,
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    title: {
+                        display: true,
+                        text: 'Simulações por Categoria'
+                    }
+                }
+            },
+        };
+
+        // Renderizar o gráfico de Categorias
+        const categoriasChart = new Chart(
+            document.getElementById('categoriasChart'),
+            categoriasConfig
+        );
+    </script>
 </body>
 
 </html>

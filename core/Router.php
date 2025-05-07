@@ -16,8 +16,15 @@ class Router {
                 echo "Método não encontrado.";
             }
         } else {
-            echo "Página não encontrada.";
+            $this->show404();
         }
     }
+
+    private function show404() {
+        http_response_code(404);
+        require_once "app/Views/404.php";
+        exit;
+    }
+
 }
 ?>

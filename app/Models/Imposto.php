@@ -37,22 +37,22 @@ class Imposto
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    public function cadastrar($cambio, $fga, $iva, $desconto, $cambio_geral)
+    public function cadastrar($cambio, $fga, $iva, $desconto, $cambioGeral)
     {
         try {
             $query = "INSERT INTO " . $this->table_name . " (cambio, fga, iva, desconto, cambio_geral) 
                       VALUES (:cambio, :fga, :iva, :desconto, :cambio_geral)";
-
             $stmt = $this->conn->prepare($query);
-            $stmt->bindParam(":cambio", $cambio, PDO::PARAM_STR);
-            $stmt->bindParam(":fga", $fga, PDO::PARAM_STR);
-            $stmt->bindParam(":iva", $iva, PDO::PARAM_STR);
-            $stmt->bindParam(":desconto", $desconto, PDO::PARAM_STR);
-            $stmt->bindParam(":cambio_geral", $cambio_geral, PDO::PARAM_STR);
+            $stmt->bindParam(':cambio', $cambio);
+            $stmt->bindParam(':fga', $fga);
+            $stmt->bindParam(':iva', $iva);
+            $stmt->bindParam(':desconto', $desconto);
+            $stmt->bindParam(':cambio_geral', $cambioGeral);
 
-            return $stmt->execute();
+            return $stmt->execute(); // Retorna true se o cadastro for bem-sucedido
         } catch (PDOException $e) {
-            return false;
+            error_log("Erro ao cadastrar imposto: " . $e->getMessage());
+            return false; // Retorna false em caso de erro
         }
     }
 
@@ -82,9 +82,11 @@ class Imposto
             $query = "DELETE FROM " . $this->table_name . " WHERE id = :id";
             $stmt = $this->conn->prepare($query);
             $stmt->bindParam(":id", $id, PDO::PARAM_INT);
-            return $stmt->execute();
+
+            return $stmt->execute(); // Retorna true se a exclusão for bem-sucedida
         } catch (PDOException $e) {
-            return false;
+            error_log("Erro ao excluir imposto: " . $e->getMessage());
+            return false; // Retorna false em caso de erro
         }
     }
 }

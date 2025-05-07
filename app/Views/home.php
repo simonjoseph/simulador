@@ -380,6 +380,7 @@ if (isset($_SESSION["error"])) {
         .step-button {
             margin-top: 1rem;
             margin-bottom: 1rem;
+            margin-left: 1rem;
         }
 
         .form-group {
@@ -926,10 +927,10 @@ if (isset($_SESSION["error"])) {
 
     <section class="hero" id="home">
         <div id="particles"></div>
-        <h1>Simuladores Tranquilidade</h1>
-        <p>Descubra o melhor seguro para você com nossos simuladores inteligentes. Tecnologia avançada para proteger o
-            que importa.</p>
-        <button class="cta-button" id="start-simulator">Simular Agora</button>
+        <!-- <h1>Simuladores Tranquilidade</h1> -->
+        <!-- <p>Descubra o melhor seguro para você com nossos simuladores inteligentes. Tecnologia avançada para proteger o
+            que importa.</p> -->
+        <!-- <button class="cta-button" id="start-simulator">Simular Agora</button> -->
     </section>
 
     <section class="simulators" id="simulators">
@@ -964,426 +965,421 @@ if (isset($_SESSION["error"])) {
             <!-- Formulário de Simulação Auto -->
             <div class="simulator-form" id="auto-form">
                 <h3>Simulador de Seguro Auto</h3>
-
-                <div class="step-1 step-container active" id="step1">
-                    <div class="form-group">
-                        <div class="container1">
-                            <label class="radio-container">
-                                <input type="radio" name="vehicle" value="mota" onchange="updateSelectOptions('mota')">
-                                <div class="radio-label">
-                                    <img src="https://cdn-icons-png.flaticon.com/128/2975/2975510.png" alt="Mota">
-                                    <span>Motociclos</span>
-                                </div>
-                            </label>
-
-                            <label class="radio-container">
-                                <input type="radio" name="vehicle" value="ligeiro"
-                                    onchange="updateSelectOptions('ligeiro')">
-                                <div class="radio-label">
-                                    <img src="https://cdn-icons-png.flaticon.com/128/2211/2211392.png" alt="Ligeiro">
-                                    <span>Ligeiro</span>
-                                </div>
-                            </label>
-
-                            <label class="radio-container">
-                                <input type="radio" name="vehicle" value="misto"
-                                    onchange="updateSelectOptions('misto')">
-                                <div class="radio-label">
-                                    <img src="https://cdn-icons-png.flaticon.com/128/2134/2134964.png" alt="Misto">
-                                    <span>Misto</span>
-                                </div>
-                            </label>
-
-                            <label class="radio-container">
-                                <input type="radio" name="vehicle" value="caminhao"
-                                    onchange="updateSelectOptions('caminhao')">
-                                <div class="radio-label">
-                                    <img src="https://cdn-icons-png.flaticon.com/128/8502/8502414.png" alt="Caminhão">
-                                    <span>Caminhão</span>
-                                </div>
-                            </label>
-                        </div>
-                    </div>
-                    <!-- <button class="cta-button step-button next-step">Próximo</button> -->
-                </div>
-
-                <div class="step-2 step-container" id="step2">
-                    <div class="form-group">
-                        <div class="container1" id="radiobtnCategory">
-                        </div>
-                    </div>
-
-                    <div class="button-container">
-                        <button class="cta-button step-button prev-step cta-right">Anterior</button>
-                    </div>
-
-                    <!-- <button class="cta-button step-button prev-step">Anterior</button> -->
-                    <!-- <button class="cta-button step-button next-step">Próximo</button> -->
-                </div>
-
-                <div class="step-3 step-container" id="step3">
-                    <div class="form-group" id="">
-                        <div class="container1">
-                            <?php foreach ($campanhas as $campanha): ?>
-                                <!--  -->
+                <form id="form-simulacao">
+                    <div class="step-1 step-container active" id="step1">
+                        <div class="form-group">
+                            <div class="container1">
                                 <label class="radio-container">
-                                    <input type="radio" name="campanha" onclick="moveToNextStepCampanha(this)" value="<?= htmlspecialchars($campanha["percentagem"]) ?>">
+                                    <input type="radio" name="vehicle" value="mota" onchange="updateSelectOptions('mota')">
                                     <div class="radio-label">
-                                        <img src="https://cdn-icons-png.flaticon.com/128/7213/7213392.png" alt="<?= htmlspecialchars($campanha["nome"]) ?>">
-                                        <span><?= htmlspecialchars($campanha["nome"]) ?> - <?= htmlspecialchars($campanha["percentagem"]) ?>%</span>
-                                        <span>Válido de <?= htmlspecialchars($campanha["data_inicio"]) ?> á <?= htmlspecialchars($campanha["data_fim"]) ?></span>
+                                        <img src="https://cdn-icons-png.flaticon.com/128/2975/2975510.png" alt="Mota">
+                                        <span>Motociclos</span>
                                     </div>
                                 </label>
 
-                            <?php endforeach; ?>
-                            <!--  -->
-                            <label class="radio-container">
-                                <input type="radio" name="campanha" onclick="moveToNextStepCampanha(this)" value="Não se aplica">
-                                <div class="radio-label">
-                                    <img src="https://cdn-icons-png.flaticon.com/128/10492/10492351.png" alt="Mota">
-                                    <span>Não se aplica as campanhas</span>
-                                </div>
-                            </label>
-                            <!--  -->
-                        </div>
-                    </div>
+                                <label class="radio-container">
+                                    <input type="radio" name="vehicle" value="ligeiro"
+                                        onchange="updateSelectOptions('ligeiro')">
+                                    <div class="radio-label">
+                                        <img src="https://cdn-icons-png.flaticon.com/128/2211/2211392.png" alt="Ligeiro">
+                                        <span>Ligeiro</span>
+                                    </div>
+                                </label>
 
-                    <div class="button-container">
-                        <button class="cta-button step-button prev-step cta-right">Anterior</button>
-                    </div>
-                    <!-- <button class="cta-button step-button prev-step">Anterior</button> -->
-                    <!-- <button class="cta-button step-button next-step">Próximo</button> -->
-                </div>
+                                <label class="radio-container">
+                                    <input type="radio" name="vehicle" value="misto"
+                                        onchange="updateSelectOptions('misto')">
+                                    <div class="radio-label">
+                                        <img src="https://cdn-icons-png.flaticon.com/128/2134/2134964.png" alt="Misto">
+                                        <span>Misto</span>
+                                    </div>
+                                </label>
 
-                <div class="step-4 step-container" id="step4">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="auto-matricula">Matricula</label>
-                            <input type="text" id="auto-matricula" placeholder="Ex: LD-00-00">
-                        </div>
-
-                        <div class="form-group">
-                            <label for="auto-cilindrada">Cilindrada</label>
-                            <!-- <input type="text" id="auto-cilindrada" placeholder="Cilindrada do Veículo"> -->
-                            <select id="auto-cilindrada">
-                                <option value="">Selecione a cilindrada do Veículo</option>
-                            </select>
-                            <!-- <input type="number" id="auto-cilindrada" placeholder="Informe a cilindrada" required /> -->
-
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="auto-year">Ano do Veículo</label>
-                            <input type="text" id="auto-year" pattern="\d{4}" placeholder="AAAA" title="Insira um ano de 4 dígitos">
-                            <!-- <select id="auto-year">
-                                <option value="">Selecione</option>
-                                <option value="2025">2025</option>
-                                <option value="2024">2024</option>
-                                <option value="2023">2023</option>
-                                <option value="2022">2022</option>
-                                <option value="2021">2021</option>
-                                <option value="2020">2020</option>
-                            </select> -->
-                        </div>
-                        <div class="form-group">
-                            <label for="auto-data">Data de Início</label>
-                            <input type="date" id="auto-data" placeholder="Data">
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="auto-marca">Marca</label>
-                            <!-- <input type="text" id="auto-marca" placeholder="Marca do Veículo"> -->
-                            <!-- k -->
-                            <div class="custom-select-container">
-                                <input type="text" id="brand-search" class="select-input" placeholder="Digite para pesquisar uma marca" autocomplete="off">
-                                <div class="select-dropdown" id="brand-dropdown"></div>
-
-                                <!-- Select original (oculto) -->
-                                <select id="auto-marca" class="hidden-select">
-                                    <option value="">-- Escolha --</option>
-                                    <option value="ACESSMAQ">ACESSMAQ</option>
-                                    <option value="Actm">Actm</option>
-                                    <option value="Acura">Acura</option>
-                                    <option value="AGIR-H">AGIR-H</option>
-                                    <option value="AJS">AJS</option>
-                                    <option value="Alfa Romeo">Alfa Romeo</option>
-                                    <option value="Alzaga">Alzaga</option>
-                                    <option value="Apollo">Apollo</option>
-                                    <option value="ARB">ARB</option>
-                                    <option value="Ashok">Ashok</option>
-                                    <option value="Astra">Astra</option>
-                                    <option value="Atrelado">Atrelado</option>
-                                    <option value="Audi">Audi</option>
-                                    <option value="AUREPA">AUREPA</option>
-                                    <option value="Axle flatdeck">Axle flatdeck</option>
-                                    <option value="BADORA">BADORA</option>
-                                    <option value="Baic">Baic</option>
-                                    <option value="Baja">Baja</option>
-                                    <option value="Baldex">Baldex</option>
-                                    <option value="BASHAN">BASHAN</option>
-                                    <option value="Basmaior">Basmaior</option>
-                                    <option value="BAW">BAW</option>
-                                    <option value="Bmw">Bmw</option>
-                                    <option value="BODA">BODA</option>
-                                    <option value="Borgward">Borgward</option>
-                                    <option value="Boxer">Boxer</option>
-                                    <option value="BYD">BYD</option>
-                                    <option value="Cadillac">Cadillac</option>
-                                    <option value="Camc">Camc</option>
-                                    <option value="Case">Case</option>
-                                    <option value="Cat">Cat</option>
-                                    <option value="CFMOTO">CFMOTO</option>
-                                    <option value="Chana">Chana</option>
-                                    <option value="Changan">Changan</option>
-                                    <option value="CHENGHWEN">CHENGHWEN</option>
-                                    <option value="Cherokee">Cherokee</option>
-                                    <option value="Chery">Chery</option>
-                                    <option value="Chevrolet">Chevrolet</option>
-                                    <option value="Chrysler">Chrysler</option>
-                                    <option value="Cimar">Cimar</option>
-                                    <option value="Cimc">Cimc</option>
-                                    <option value="Cimic">Cimic</option>
-                                    <option value="CISFRA">CISFRA</option>
-                                    <option value="Citroen">Citroen</option>
-                                    <option value="Cnhtc">Cnhtc</option>
-                                    <option value="CNJ">CNJ</option>
-                                    <option value="COASTER">COASTER</option>
-                                    <option value="Cocimecam">Cocimecam</option>
-                                    <option value="Cometa">Cometa</option>
-                                    <option value="Commuter">Commuter</option>
-                                    <option value="CSG">CSG</option>
-                                    <option value="Dacia">Dacia</option>
-                                    <option value="Daf">Daf</option>
-                                    <option value="Daihatsu">Daihatsu</option>
-                                    <option value="Daimler">Daimler</option>
-                                    <option value="Dakar">Dakar</option>
-                                    <option value="Dayun">Dayun</option>
-                                    <option value="DELOP">DELOP</option>
-                                    <option value="Dfsk">Dfsk</option>
-                                    <option value="Dodge">Dodge</option>
-                                    <option value="DONG FENG">DONG FENG</option>
-                                    <option value="Ducati">Ducati</option>
-                                    <option value="Dump">Dump</option>
-                                    <option value="Dynapac">Dynapac</option>
-                                    <option value="ELGIN">ELGIN</option>
-                                    <option value="F.X.MEILLER">F.X.MEILLER</option>
-                                    <option value="Facchini">Facchini</option>
-                                    <option value="Faw">Faw</option>
-                                    <option value="FEELY">FEELY</option>
-                                    <option value="Ferrari">Ferrari</option>
-                                    <option value="FH15">FH15</option>
-                                    <option value="Fh4">Fh4</option>
-                                    <option value="Fiat">Fiat</option>
-                                    <option value="Ford">Ford</option>
-                                    <option value="Foton">Foton</option>
-                                    <option value="Fruehauf">Fruehauf</option>
-                                    <option value="FUWA">FUWA</option>
-                                    <option value="Galtrailer">Galtrailer</option>
-                                    <option value="Galucho">Galucho</option>
-                                    <option value="GEELY">GEELY</option>
-                                    <option value="Gmc">Gmc</option>
-                                    <option value="GOLDEN">GOLDEN</option>
-                                    <option value="Golden dragon">Golden dragon</option>
-                                    <option value="GRAND CHEROKEE">GRAND CHEROKEE</option>
-                                    <option value="Great wall">Great wall</option>
-                                    <option value="Grove">Grove</option>
-                                    <option value="GVM">GVM</option>
-                                    <option value="Haima">Haima</option>
-                                    <option value="Hama">Hama</option>
-                                    <option value="Hammer">Hammer</option>
-                                    <option value="Hawtai">Hawtai</option>
-                                    <option value="Henred">Henred</option>
-                                    <option value="HIGER">HIGER</option>
-                                    <option value="Hino">Hino</option>
-                                    <option value="Honda">Honda</option>
-                                    <option value="Hong Yan">Hong Yan</option>
-                                    <option value="HORYONG">HORYONG</option>
-                                    <option value="HOS">HOS</option>
-                                    <option value="Howo">Howo</option>
-                                    <option value="Huangai">Huangai</option>
-                                    <option value="Hyundai">Hyundai</option>
-                                    <option value="Infiniti">Infiniti</option>
-                                    <option value="INFINITY">INFINITY</option>
-                                    <option value="INTERNATIONAL">INTERNATIONAL</option>
-                                    <option value="Invepe">Invepe</option>
-                                    <option value="Isuzu">Isuzu</option>
-                                    <option value="Iveco">Iveco</option>
-                                    <option value="Jac">Jac</option>
-                                    <option value="Jaguar">Jaguar</option>
-                                    <option value="Jeep">Jeep</option>
-                                    <option value="Jetour">Jetour</option>
-                                    <option value="Jiefang">Jiefang</option>
-                                    <option value="Jinbei">Jinbei</option>
-                                    <option value="Jincheng">Jincheng</option>
-                                    <option value="Jmc">Jmc</option>
-                                    <option value="Jog">Jog</option>
-                                    <option value="Joluso">Joluso</option>
-                                    <option value="KAIYI">KAIYI</option>
-                                    <option value="KALELUYA">KALELUYA</option>
-                                    <option value="Kamaz">Kamaz</option>
-                                    <option value="Kawasaki">Kawasaki</option>
-                                    <option value="Kearney">Kearney</option>
-                                    <option value="Keeway">Keeway</option>
-                                    <option value="KENWORTH">KENWORTH</option>
-                                    <option value="Keweseki">Keweseki</option>
-                                    <option value="Kia">Kia</option>
-                                    <option value="KINFAN">KINFAN</option>
-                                    <option value="KINGLONG">KINGLONG</option>
-                                    <option value="Komatsu">Komatsu</option>
-                                    <option value="Krone">Krone</option>
-                                    <option value="KRONORTE">KRONORTE</option>
-                                    <option value="Ktm">Ktm</option>
-                                    <option value="Lamberete">Lamberete</option>
-                                    <option value="Lamborghini">Lamborghini</option>
-                                    <option value="Land rover">Land rover</option>
-                                    <option value="LANDINI">LANDINI</option>
-                                    <option value="Lecinena">Lecinena</option>
-                                    <option value="LECITRAILER">LECITRAILER</option>
-                                    <option value="Leopard">Leopard</option>
-                                    <option value="Lexus">Lexus</option>
-                                    <option value="Lifan">Lifan</option>
-                                    <option value="Lincoln">Lincoln</option>
-                                    <option value="Lingken">Lingken</option>
-                                    <option value="LISTRAILER">LISTRAILER</option>
-                                    <option value="Lohr">Lohr</option>
-                                    <option value="Lufeng">Lufeng</option>
-                                    <option value="MACK">MACK</option>
-                                    <option value="Mahindra">Mahindra</option>
-                                    <option value="Man">Man</option>
-                                    <option value="Maserati">Maserati</option>
-                                    <option value="Maxus">Maxus</option>
-                                    <option value="Mazda">Mazda</option>
-                                    <option value="Mercedes">Mercedes</option>
-                                    <option value="MERLO">MERLO</option>
-                                    <option value="METALESP">METALESP</option>
-                                    <option value="METALOVOUGA">METALOVOUGA</option>
-                                    <option value="MG">MG</option>
-                                    <option value="Mike Bike">Mike Bike</option>
-                                    <option value="Mini">Mini</option>
-                                    <option value="Mitsubishi">Mitsubishi</option>
-                                    <option value="Montenegro">Montenegro</option>
-                                    <option value="MOTOANGOLA">MOTOANGOLA</option>
-                                    <option value="N1 Mars">N1 Mars</option>
-                                    <option value="Nissan">Nissan</option>
-                                    <option value="Noma">Noma</option>
-                                    <option value="Olong">Olong</option>
-                                    <option value="Opel">Opel</option>
-                                    <option value="PEGADO">PEGADO</option>
-                                    <option value="Peugeot">Peugeot</option>
-                                    <option value="Piaggio">Piaggio</option>
-                                    <option value="Porsche">Porsche</option>
-                                    <option value="Porta Maquina">Porta Maquina</option>
-                                    <option value="Randon">Randon</option>
-                                    <option value="Range rover">Range rover</option>
-                                    <option value="RAVO">RAVO</option>
-                                    <option value="Remolque">Remolque</option>
-                                    <option value="Renault">Renault</option>
-                                    <option value="Retroescavadeira">Retroescavadeira</option>
-                                    <option value="Rio Trailer">Rio Trailer</option>
-                                    <option value="RODOLINEA">RODOLINEA</option>
-                                    <option value="Rouco">Rouco</option>
-                                    <option value="SANY">SANY</option>
-                                    <option value="Scania">Scania</option>
-                                    <option value="Seat">Seat</option>
-                                    <option value="Semi Reboque">Semi Reboque</option>
-                                    <option value="Shacman">Shacman</option>
-                                    <option value="SHAN QI">SHAN QI</option>
-                                    <option value="Sinotruck">Sinotruck</option>
-                                    <option value="SINOTRUK HOWO">SINOTRUK HOWO</option>
-                                    <option value="Ssangyong">Ssangyong</option>
-                                    <option value="Steelbro">Steelbro</option>
-                                    <option value="STEYER">STEYER</option>
-                                    <option value="Suzuki">Suzuki</option>
-                                    <option value="TAILOR">TAILOR</option>
-                                    <option value="Tata">Tata</option>
-                                    <option value="Terex">Terex</option>
-                                    <option value="Titan">Titan</option>
-                                    <option value="TLEQUIP TLTES">TLEQUIP TLTES</option>
-                                    <option value="Tonghua">Tonghua</option>
-                                    <option value="Toyota">Toyota</option>
-                                    <option value="Trailer">Trailer</option>
-                                    <option value="TRALLOR">TRALLOR</option>
-                                    <option value="Truck">Truck</option>
-                                    <option value="TVS">TVS</option>
-                                    <option value="Unimog">Unimog</option>
-                                    <option value="URAL">URAL</option>
-                                    <option value="VALART">VALART</option>
-                                    <option value="Venter">Venter</option>
-                                    <option value="Vespa">Vespa</option>
-                                    <option value="Volare">Volare</option>
-                                    <option value="Volkswagen">Volkswagen</option>
-                                    <option value="Volvo">Volvo</option>
-                                    <option value="WABCO">WABCO</option>
-                                    <option value="Wuling">Wuling</option>
-                                    <option value="Xcmg">Xcmg</option>
-                                    <option value="XING YONG">XING YONG</option>
-                                    <option value="YAMAHA">YAMAHA</option>
-                                    <option value="Yamaha 125">Yamaha 125</option>
-                                    <option value="Yamang">Yamang</option>
-                                    <option value="Yaxing">Yaxing</option>
-                                    <option value="YUEJIN">YUEJIN</option>
-                                    <option value="Yutong">Yutong</option>
-                                    <option value="Zenza">Zenza</option>
-                                    <option value="Zoomlion">Zoomlion</option>
-                                    <option value="Zxauto">Zxauto</option>
-                                </select>
+                                <label class="radio-container">
+                                    <input type="radio" name="vehicle" value="caminhao"
+                                        onchange="updateSelectOptions('caminhao')">
+                                    <div class="radio-label">
+                                        <img src="https://cdn-icons-png.flaticon.com/128/8502/8502414.png" alt="Caminhão">
+                                        <span>Caminhão</span>
+                                    </div>
+                                </label>
                             </div>
-                            <!--  -->
                         </div>
+                        <!-- <button class="cta-button step-button next-step">Próximo</button> -->
+                    </div>
 
+                    <div class="step-2 step-container" id="step2">
                         <div class="form-group">
-                            <label for="auto-modelo">Modelo</label>
-                            <input type="text" id="auto-modelo" placeholder="Modelo do Veículo">
+                            <div class="container1" id="radiobtnCategory">
+                            </div>
                         </div>
 
+                        <div class="button-container">
+                            <button type="button" class="cta-button step-button prev-step cta-right">Anterior</button>
+                        </div>
+
+                        <!-- <button class="cta-button step-button prev-step">Anterior</button> -->
+                        <!-- <button class="cta-button step-button next-step">Próximo</button> -->
                     </div>
 
-                    <div class="button-container">
-                        <button class="cta-button step-button prev-step cta-right">Anterior</button>
-                        <button class="cta-button step-button next-step">Próximo</button>
+                    <div class="step-3 step-container" id="step3">
+                        <div class="form-group" id="">
+                            <div class="container1">
+                                <?php foreach ($campanhas as $campanha): ?>
+                                    <!--  -->
+                                    <label class="radio-container">
+                                        <input type="radio" id="<?= htmlspecialchars($campanha["id"]) ?>" name="campanha" onclick="moveToNextStepCampanha(this)" value="<?= htmlspecialchars($campanha["percentagem"]) ?>">
+                                        <div class="radio-label">
+                                            <img src="https://cdn-icons-png.flaticon.com/128/7213/7213392.png" alt="<?= htmlspecialchars($campanha["nome"]) ?>">
+                                            <span><?= htmlspecialchars($campanha["nome"]) ?> - <?= htmlspecialchars($campanha["percentagem"]) ?>%</span>
+                                            <span>Válido de <?= htmlspecialchars($campanha["data_inicio"]) ?> á <?= htmlspecialchars($campanha["data_fim"]) ?></span>
+                                        </div>
+                                    </label>
+
+                                <?php endforeach; ?>
+                                <!--  -->
+                                <label class="radio-container">
+                                    <input type="radio" id="semCampanha" name="campanha" onclick="moveToNextStepCampanha(this)" value="Não se aplica">
+                                    <div class="radio-label">
+                                        <img src="https://cdn-icons-png.flaticon.com/128/10492/10492351.png" alt="Mota">
+                                        <span>Não se aplica as campanhas</span>
+                                    </div>
+                                </label>
+                                <!--  -->
+                            </div>
+                        </div>
+
+                        <div class="button-container">
+                            <button type="button" class="cta-button step-button prev-step cta-right">Anterior</button>
+                        </div>
+                        <!-- <button class="cta-button step-button prev-step">Anterior</button> -->
+                        <!-- <button class="cta-button step-button next-step">Próximo</button> -->
                     </div>
-                    <!-- <button class="cta-button step-button prev-step">Anterior</button>
+
+                    <div class="step-4 step-container" id="step4">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="auto-matricula">Matricula</label>
+                                <input type="text" id="auto-matricula" required placeholder="Ex: LD-00-00">
+                                <span class="error-message">Por favor, preencha o nome completo.</span>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="auto-cilindrada">Cilindrada</label>
+                                <!-- <input type="text" id="auto-cilindrada" placeholder="Cilindrada do Veículo"> -->
+                                <select id="auto-cilindrada" required>
+                                    <option value="">Selecione a cilindrada do Veículo</option>
+                                    <span class="error-message">Por favor, preencha o nome completo.</span>
+                                </select>
+                                <!-- <input type="number" id="auto-cilindrada" placeholder="Informe a cilindrada" required /> -->
+
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="auto-year">Ano do Veículo</label>
+                                <input type="text" id="auto-year" min="1900" max="2100" required placeholder="AAAA" title="Insira um ano de 4 dígitos">
+                                <span class="error-message">Por favor, preencha o nome completo.</span>
+                            </div>
+                            <div class="form-group">
+                                <label for="auto-data">Data de Início</label>
+                                <input type="date" id="auto-data" placeholder="Data" required>
+                                <span class="error-message">Por favor, preencha o nome completo.</span>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="auto-marca">Marca</label>
+                                <!-- <input type="text" id="auto-marca" placeholder="Marca do Veículo"> -->
+                                <!-- k -->
+                                <div class="custom-select-container">
+                                    <input type="text" id="brand-search" class="select-input" placeholder="Digite para pesquisar uma marca" autocomplete="off">
+                                    <div class="select-dropdown" id="brand-dropdown"></div>
+
+                                    <!-- Select original (oculto) -->
+                                    <select id="auto-marca" class="hidden-select">
+                                        <option value="">-- Escolha --</option>
+                                        <option value="ACESSMAQ">ACESSMAQ</option>
+                                        <option value="Actm">Actm</option>
+                                        <option value="Acura">Acura</option>
+                                        <option value="AGIR-H">AGIR-H</option>
+                                        <option value="AJS">AJS</option>
+                                        <option value="Alfa Romeo">Alfa Romeo</option>
+                                        <option value="Alzaga">Alzaga</option>
+                                        <option value="Apollo">Apollo</option>
+                                        <option value="ARB">ARB</option>
+                                        <option value="Ashok">Ashok</option>
+                                        <option value="Astra">Astra</option>
+                                        <option value="Atrelado">Atrelado</option>
+                                        <option value="Audi">Audi</option>
+                                        <option value="AUREPA">AUREPA</option>
+                                        <option value="Axle flatdeck">Axle flatdeck</option>
+                                        <option value="BADORA">BADORA</option>
+                                        <option value="Baic">Baic</option>
+                                        <option value="Baja">Baja</option>
+                                        <option value="Baldex">Baldex</option>
+                                        <option value="BASHAN">BASHAN</option>
+                                        <option value="Basmaior">Basmaior</option>
+                                        <option value="BAW">BAW</option>
+                                        <option value="Bmw">Bmw</option>
+                                        <option value="BODA">BODA</option>
+                                        <option value="Borgward">Borgward</option>
+                                        <option value="Boxer">Boxer</option>
+                                        <option value="BYD">BYD</option>
+                                        <option value="Cadillac">Cadillac</option>
+                                        <option value="Camc">Camc</option>
+                                        <option value="Case">Case</option>
+                                        <option value="Cat">Cat</option>
+                                        <option value="CFMOTO">CFMOTO</option>
+                                        <option value="Chana">Chana</option>
+                                        <option value="Changan">Changan</option>
+                                        <option value="CHENGHWEN">CHENGHWEN</option>
+                                        <option value="Cherokee">Cherokee</option>
+                                        <option value="Chery">Chery</option>
+                                        <option value="Chevrolet">Chevrolet</option>
+                                        <option value="Chrysler">Chrysler</option>
+                                        <option value="Cimar">Cimar</option>
+                                        <option value="Cimc">Cimc</option>
+                                        <option value="Cimic">Cimic</option>
+                                        <option value="CISFRA">CISFRA</option>
+                                        <option value="Citroen">Citroen</option>
+                                        <option value="Cnhtc">Cnhtc</option>
+                                        <option value="CNJ">CNJ</option>
+                                        <option value="COASTER">COASTER</option>
+                                        <option value="Cocimecam">Cocimecam</option>
+                                        <option value="Cometa">Cometa</option>
+                                        <option value="Commuter">Commuter</option>
+                                        <option value="CSG">CSG</option>
+                                        <option value="Dacia">Dacia</option>
+                                        <option value="Daf">Daf</option>
+                                        <option value="Daihatsu">Daihatsu</option>
+                                        <option value="Daimler">Daimler</option>
+                                        <option value="Dakar">Dakar</option>
+                                        <option value="Dayun">Dayun</option>
+                                        <option value="DELOP">DELOP</option>
+                                        <option value="Dfsk">Dfsk</option>
+                                        <option value="Dodge">Dodge</option>
+                                        <option value="DONG FENG">DONG FENG</option>
+                                        <option value="Ducati">Ducati</option>
+                                        <option value="Dump">Dump</option>
+                                        <option value="Dynapac">Dynapac</option>
+                                        <option value="ELGIN">ELGIN</option>
+                                        <option value="F.X.MEILLER">F.X.MEILLER</option>
+                                        <option value="Facchini">Facchini</option>
+                                        <option value="Faw">Faw</option>
+                                        <option value="FEELY">FEELY</option>
+                                        <option value="Ferrari">Ferrari</option>
+                                        <option value="FH15">FH15</option>
+                                        <option value="Fh4">Fh4</option>
+                                        <option value="Fiat">Fiat</option>
+                                        <option value="Ford">Ford</option>
+                                        <option value="Foton">Foton</option>
+                                        <option value="Fruehauf">Fruehauf</option>
+                                        <option value="FUWA">FUWA</option>
+                                        <option value="Galtrailer">Galtrailer</option>
+                                        <option value="Galucho">Galucho</option>
+                                        <option value="GEELY">GEELY</option>
+                                        <option value="Gmc">Gmc</option>
+                                        <option value="GOLDEN">GOLDEN</option>
+                                        <option value="Golden dragon">Golden dragon</option>
+                                        <option value="GRAND CHEROKEE">GRAND CHEROKEE</option>
+                                        <option value="Great wall">Great wall</option>
+                                        <option value="Grove">Grove</option>
+                                        <option value="GVM">GVM</option>
+                                        <option value="Haima">Haima</option>
+                                        <option value="Hama">Hama</option>
+                                        <option value="Hammer">Hammer</option>
+                                        <option value="Hawtai">Hawtai</option>
+                                        <option value="Henred">Henred</option>
+                                        <option value="HIGER">HIGER</option>
+                                        <option value="Hino">Hino</option>
+                                        <option value="Honda">Honda</option>
+                                        <option value="Hong Yan">Hong Yan</option>
+                                        <option value="HORYONG">HORYONG</option>
+                                        <option value="HOS">HOS</option>
+                                        <option value="Howo">Howo</option>
+                                        <option value="Huangai">Huangai</option>
+                                        <option value="Hyundai">Hyundai</option>
+                                        <option value="Infiniti">Infiniti</option>
+                                        <option value="INFINITY">INFINITY</option>
+                                        <option value="INTERNATIONAL">INTERNATIONAL</option>
+                                        <option value="Invepe">Invepe</option>
+                                        <option value="Isuzu">Isuzu</option>
+                                        <option value="Iveco">Iveco</option>
+                                        <option value="Jac">Jac</option>
+                                        <option value="Jaguar">Jaguar</option>
+                                        <option value="Jeep">Jeep</option>
+                                        <option value="Jetour">Jetour</option>
+                                        <option value="Jiefang">Jiefang</option>
+                                        <option value="Jinbei">Jinbei</option>
+                                        <option value="Jincheng">Jincheng</option>
+                                        <option value="Jmc">Jmc</option>
+                                        <option value="Jog">Jog</option>
+                                        <option value="Joluso">Joluso</option>
+                                        <option value="KAIYI">KAIYI</option>
+                                        <option value="KALELUYA">KALELUYA</option>
+                                        <option value="Kamaz">Kamaz</option>
+                                        <option value="Kawasaki">Kawasaki</option>
+                                        <option value="Kearney">Kearney</option>
+                                        <option value="Keeway">Keeway</option>
+                                        <option value="KENWORTH">KENWORTH</option>
+                                        <option value="Keweseki">Keweseki</option>
+                                        <option value="Kia">Kia</option>
+                                        <option value="KINFAN">KINFAN</option>
+                                        <option value="KINGLONG">KINGLONG</option>
+                                        <option value="Komatsu">Komatsu</option>
+                                        <option value="Krone">Krone</option>
+                                        <option value="KRONORTE">KRONORTE</option>
+                                        <option value="Ktm">Ktm</option>
+                                        <option value="Lamberete">Lamberete</option>
+                                        <option value="Lamborghini">Lamborghini</option>
+                                        <option value="Land rover">Land rover</option>
+                                        <option value="LANDINI">LANDINI</option>
+                                        <option value="Lecinena">Lecinena</option>
+                                        <option value="LECITRAILER">LECITRAILER</option>
+                                        <option value="Leopard">Leopard</option>
+                                        <option value="Lexus">Lexus</option>
+                                        <option value="Lifan">Lifan</option>
+                                        <option value="Lincoln">Lincoln</option>
+                                        <option value="Lingken">Lingken</option>
+                                        <option value="LISTRAILER">LISTRAILER</option>
+                                        <option value="Lohr">Lohr</option>
+                                        <option value="Lufeng">Lufeng</option>
+                                        <option value="MACK">MACK</option>
+                                        <option value="Mahindra">Mahindra</option>
+                                        <option value="Man">Man</option>
+                                        <option value="Maserati">Maserati</option>
+                                        <option value="Maxus">Maxus</option>
+                                        <option value="Mazda">Mazda</option>
+                                        <option value="Mercedes">Mercedes</option>
+                                        <option value="MERLO">MERLO</option>
+                                        <option value="METALESP">METALESP</option>
+                                        <option value="METALOVOUGA">METALOVOUGA</option>
+                                        <option value="MG">MG</option>
+                                        <option value="Mike Bike">Mike Bike</option>
+                                        <option value="Mini">Mini</option>
+                                        <option value="Mitsubishi">Mitsubishi</option>
+                                        <option value="Montenegro">Montenegro</option>
+                                        <option value="MOTOANGOLA">MOTOANGOLA</option>
+                                        <option value="N1 Mars">N1 Mars</option>
+                                        <option value="Nissan">Nissan</option>
+                                        <option value="Noma">Noma</option>
+                                        <option value="Olong">Olong</option>
+                                        <option value="Opel">Opel</option>
+                                        <option value="PEGADO">PEGADO</option>
+                                        <option value="Peugeot">Peugeot</option>
+                                        <option value="Piaggio">Piaggio</option>
+                                        <option value="Porsche">Porsche</option>
+                                        <option value="Porta Maquina">Porta Maquina</option>
+                                        <option value="Randon">Randon</option>
+                                        <option value="Range rover">Range rover</option>
+                                        <option value="RAVO">RAVO</option>
+                                        <option value="Remolque">Remolque</option>
+                                        <option value="Renault">Renault</option>
+                                        <option value="Retroescavadeira">Retroescavadeira</option>
+                                        <option value="Rio Trailer">Rio Trailer</option>
+                                        <option value="RODOLINEA">RODOLINEA</option>
+                                        <option value="Rouco">Rouco</option>
+                                        <option value="SANY">SANY</option>
+                                        <option value="Scania">Scania</option>
+                                        <option value="Seat">Seat</option>
+                                        <option value="Semi Reboque">Semi Reboque</option>
+                                        <option value="Shacman">Shacman</option>
+                                        <option value="SHAN QI">SHAN QI</option>
+                                        <option value="Sinotruck">Sinotruck</option>
+                                        <option value="SINOTRUK HOWO">SINOTRUK HOWO</option>
+                                        <option value="Ssangyong">Ssangyong</option>
+                                        <option value="Steelbro">Steelbro</option>
+                                        <option value="STEYER">STEYER</option>
+                                        <option value="Suzuki">Suzuki</option>
+                                        <option value="TAILOR">TAILOR</option>
+                                        <option value="Tata">Tata</option>
+                                        <option value="Terex">Terex</option>
+                                        <option value="Titan">Titan</option>
+                                        <option value="TLEQUIP TLTES">TLEQUIP TLTES</option>
+                                        <option value="Tonghua">Tonghua</option>
+                                        <option value="Toyota">Toyota</option>
+                                        <option value="Trailer">Trailer</option>
+                                        <option value="TRALLOR">TRALLOR</option>
+                                        <option value="Truck">Truck</option>
+                                        <option value="TVS">TVS</option>
+                                        <option value="Unimog">Unimog</option>
+                                        <option value="URAL">URAL</option>
+                                        <option value="VALART">VALART</option>
+                                        <option value="Venter">Venter</option>
+                                        <option value="Vespa">Vespa</option>
+                                        <option value="Volare">Volare</option>
+                                        <option value="Volkswagen">Volkswagen</option>
+                                        <option value="Volvo">Volvo</option>
+                                        <option value="WABCO">WABCO</option>
+                                        <option value="Wuling">Wuling</option>
+                                        <option value="Xcmg">Xcmg</option>
+                                        <option value="XING YONG">XING YONG</option>
+                                        <option value="YAMAHA">YAMAHA</option>
+                                        <option value="Yamaha 125">Yamaha 125</option>
+                                        <option value="Yamang">Yamang</option>
+                                        <option value="Yaxing">Yaxing</option>
+                                        <option value="YUEJIN">YUEJIN</option>
+                                        <option value="Yutong">Yutong</option>
+                                        <option value="Zenza">Zenza</option>
+                                        <option value="Zoomlion">Zoomlion</option>
+                                        <option value="Zxauto">Zxauto</option>
+                                    </select>
+                                </div>
+                                <!--  -->
+                            </div>
+
+                            <div class="form-group">
+                                <label for="auto-modelo">Modelo</label>
+                                <input type="text" id="auto-modelo" required placeholder="Modelo do Veículo">
+                            </div>
+
+                        </div>
+
+                        <div class="button-container">
+                            <button type="button" class="cta-button step-button prev-step cta-right">Anterior</button>
+                            <button type="button" class="cta-button step-button next-step">Próximo</button>
+                        </div>
+                        <!-- <button class="cta-button step-button prev-step">Anterior</button>
                     <button class="cta-button step-button next-step">Próximo</button> -->
-                </div>
+                    </div>
 
-                <div class="step-5 step-container" id="step5">
-                    <div class="form-group">
-                        <label for="full-name">Nome Completo</label>
-                        <input type="text" id="full-name" placeholder="Digite seu nome completo" required>
-                        <span class="error-message">Por favor, preencha o nome completo.</span>
+                    <div class="step-5 step-container" id="step5">
+                        <div class="form-group">
+                            <label for="full-name">Nome Completo</label>
+                            <input type="text" id="full-name" placeholder="Digite seu nome completo" required>
+                            <span class="error-message">Por favor, preencha o nome completo.</span>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" id="email" placeholder="Digite seu email" required>
+                            <span class="error-message">Por favor, preencha um email válido.</span>
+                        </div>
+                        <div class="form-group">
+                            <label for="nif">NIF</label>
+                            <input type="text" id="nif" placeholder="Digite seu NIF" required>
+                            <span class="error-message">Por favor, preencha um NIF válido (14 dígitos).</span>
+                        </div>
+                        <div class="form-group">
+                            <label for="contact">Contato</label>
+                            <input type="tel" id="contact" placeholder="Digite seu número de telefone" required>
+                            <span class="error-message">Por favor, preencha um número de telefone válido.</span>
+                        </div>
+                        <div class="form-group">
+                            <label for="address">Endereço</label>
+                            <input type="text" id="address" placeholder="Digite seu endereço" required>
+                            <span class="error-message">Por favor, preencha o endereço.</span>
+                        </div>
+                        <button type="button" class="cta-button step-button prev-step">Anterior</button>
+                        <button type="submit" class="cta-button step-button next-step" id="calculate-auto">Próximo</button>
                     </div>
-                    <div class="form-group">
-                        <label for="email">Email</label>
-                        <input type="email" id="email" placeholder="Digite seu email" required>
-                        <span class="error-message">Por favor, preencha um email válido.</span>
-                    </div>
-                    <div class="form-group">
-                        <label for="nif">NIF</label>
-                        <input type="text" id="nif" placeholder="Digite seu NIF" required>
-                        <span class="error-message">Por favor, preencha um NIF válido (9 dígitos).</span>
-                    </div>
-                    <div class="form-group">
-                        <label for="contact">Contato</label>
-                        <input type="tel" id="contact" placeholder="Digite seu número de telefone" required>
-                        <span class="error-message">Por favor, preencha um número de telefone válido.</span>
-                    </div>
-                    <div class="form-group">
-                        <label for="address">Endereço</label>
-                        <input type="text" id="address" placeholder="Digite seu endereço" required>
-                        <span class="error-message">Por favor, preencha o endereço.</span>
-                    </div>
-                    <button class="cta-button step-button prev-step">Anterior</button>
-                    <button class="cta-button step-button next-step">Próximo</button>
-                </div>
 
-                <div class="step-6 step-container" id="step6">
-                    <button class="cta-button step-button prev-step">Anterior</button>
-                    <form id="form-simulacao">
-                        <button type="submit" class="cta-button" id="calculate-auto">Calcular</button>
+                    <div class="step-6 step-container" id="step6">
+                        <!-- <button class="cta-button step-button prev-step">Anterior</button> -->
+                        <!-- <form id="form-simulacao"> -->
+                        <!-- <button type="submit" class="cta-button" id="calculate-auto">Calcular</button> -->
                         <!--  -->
                         <div class="result-container" id="auto-result">
                             <div class="header-pdf">
@@ -1421,7 +1417,7 @@ if (isset($_SESSION["error"])) {
                                             <input type="hidden" name="id_categoria" id="input_id_categoria">
                                             <input type="hidden" name="premio_rc_legal" id="input_premio_rc_legal">
                                             <input type="hidden" name="premio_comercial_rc" id="input_premio_comercial_rc">
-
+                                            <input type="hidden" name="campanha_id" id="input_campanha_id">
                                             <!-- Aqui vai o conteúdo da sua simulação... -->
                                         </div>
                                         <div class="result-detail-pdf">
@@ -1525,9 +1521,10 @@ if (isset($_SESSION["error"])) {
                             </div>
                         </div>
                         <!--  -->
-                    </form>
-                </div>
-                <button class="back-button">Voltar</button>
+                        <!-- </form> -->
+                    </div>
+                    <button type="button" class="back-button">Voltar</button>
+                </form>
             </div>
 
             <!-- Formulário de Simulação Vida -->
@@ -1656,6 +1653,9 @@ if (isset($_SESSION["error"])) {
         </div>
     </div>
 
+    <script> window.chtlConfig = { chatbotId: "8686992867" } </script>
+<script async data-id="8686992867" id="chatling-embed-script" type="text/javascript" src="https://chatling.ai/js/embed.js"></script>
+
     <script>
         const options = <?php echo json_encode($modeloCategorias); ?>;
         const optionsTarifas = <?php echo json_encode($tarifas); ?>;
@@ -1715,7 +1715,7 @@ if (isset($_SESSION["error"])) {
                 div.style.width = "auto";
 
                 const img = document.createElement("img");
-                img.src = "https://cdn-icons-png.flaticon.com/128/189/189235.png";
+                img.src = "https://cdn-icons-png.flaticon.com/128/1455/1455324.png";
                 img.alt = optionData.nome;
 
                 const span = document.createElement("span");
@@ -1826,7 +1826,7 @@ if (isset($_SESSION["error"])) {
                     this.textContent = 'Dados Salvos!';
 
                     setTimeout(() => {
-                        alert('Formulário enviado com sucesso!');
+                        // alert('Formulário enviado com sucesso!');
                         // Aqui poderia redirecionar para o próximo passo
                     }, 1000);
                 } else {
@@ -1858,9 +1858,9 @@ if (isset($_SESSION["error"])) {
                             }
                             break;
                         case 'nif':
-                            const nifRegex = /^\d{9}$/;
+                            const nifRegex = /^\d{9}[A-Za-z]{2}\d{3}$/;
                             if (!nifRegex.test(input.value)) {
-                                showError(formGroup, errorMessage, 'O NIF deve conter 9 dígitos.');
+                                showError(formGroup, errorMessage, 'O NIF deve conter 14 dígitos.');
                                 isValid = false;
                             }
                             break;
@@ -1874,6 +1874,13 @@ if (isset($_SESSION["error"])) {
                         case 'full-name':
                             if (input.value.trim().split(' ').length < 2) {
                                 showError(formGroup, errorMessage, 'Insira seu nome completo.');
+                                isValid = false;
+                            }
+                            break;
+                        case 'auto-year':
+                            const yearRegex = /^(19|20)\d{2}$/;
+                            if (!yearRegex.test(input.value)) {
+                                showError(formGroup, errorMessage, 'Insira um ano válido.');
                                 isValid = false;
                             }
                             break;
@@ -2254,6 +2261,7 @@ if (isset($_SESSION["error"])) {
                 });
             });
 
+            let id_campanha_selecionada;
             // --- Auto Calculator ---
             document.getElementById('calculate-auto').addEventListener('click', function() {
                 const matricula = document.getElementById('auto-matricula').value;
@@ -2273,6 +2281,7 @@ if (isset($_SESSION["error"])) {
                 for (const campanha of campanhas) {
                     if (campanha.checked) {
                         campanha_selecionada = campanha.value;
+                        id_campanha_selecionada = campanha.id;
                         break;
                     }
                 }
@@ -2318,7 +2327,14 @@ if (isset($_SESSION["error"])) {
 
                 if (campanha_selecionada == "Não se aplica") {
                     campanha_selecionada = 0
+                    // id_campanha_selecionada = ""
                 }
+
+                // if (id_campanha_selecionada == "semCampanha") {
+                //     id_campanha_selecionada = null
+                // }
+
+                // alert(id_campanha_selecionada)
                 campanha_selecionada = campanha_selecionada / 100
 
                 /*Resultado simulação*/
@@ -2399,6 +2415,7 @@ if (isset($_SESSION["error"])) {
             document.getElementById("input_id_categoria").value = document.getElementById("categoria_result").innerText;
             document.getElementById("input_premio_rc_legal").value = document.getElementById("rc_legal").innerText;
             document.getElementById("input_premio_comercial_rc").value = document.getElementById("comercial_rc").innerText;
+            document.getElementById("input_campanha_id").value = id_campanha_selecionada;
 
             // Mostrar tela de loading
             const loadingOverlay = document.createElement('div');
@@ -2437,207 +2454,209 @@ if (isset($_SESSION["error"])) {
 
             // Adicione os estilos para o loading
             const styleElement = document.createElement('style');
-            styleElement.textContent = `
-            .loading-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 30, 0.9);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-            font-family: 'Arial', sans-serif;
-            }
+            styleElement.textContent = 
+            `
+                .loading-container {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0, 0, 30, 0.9);
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                z-index: 9999;
+                font-family: 'Arial', sans-serif;
+                }
+                
+                .loading-animation {
+                position: relative;
+                width: 300px;
+                height: 200px;
+                }
             
-            .loading-animation {
-            position: relative;
-            width: 300px;
-            height: 200px;
-            }
-        
-            /* Estilo do carro */
-            .car {
-            position: absolute;
-            width: 120px;
-            height: 50px;
-            top: 100px;
-            left: 90px;
-            z-index: 10;
-            animation: carBounce 1s infinite ease-in-out;
-            }
+                /* Estilo do carro */
+                .car {
+                position: absolute;
+                width: 120px;
+                height: 50px;
+                top: 100px;
+                left: 90px;
+                z-index: 10;
+                animation: carBounce 1s infinite ease-in-out;
+                }
+                
+                .car-body {
+                position: absolute;
+                width: 100%;
+                height: 100%;
+                background: #00af9e;
+                border-radius: 12px;
+                }
             
-            .car-body {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            background: #00af9e;
-            border-radius: 12px;
-            }
-        
-            .car-top {
-            position: absolute;
-            top: -20px;
-            left: 25px;
-            width: 70px;
-            height: 22px;
-            background: #00af9e;
-            border-radius: 10px 10px 0 0;
-            }
+                .car-top {
+                position: absolute;
+                top: -20px;
+                left: 25px;
+                width: 70px;
+                height: 22px;
+                background: #00af9e;
+                border-radius: 10px 10px 0 0;
+                }
+                
+                .car-bottom {
+                position: absolute;
+                bottom: -5px;
+                width: 100%;
+                height: 10px;
+                background: #0090a0;
+                border-radius: 0 0 5px 5px;
+                }
             
-            .car-bottom {
-            position: absolute;
-            bottom: -5px;
-            width: 100%;
-            height: 10px;
-            background: #0090a0;
-            border-radius: 0 0 5px 5px;
-            }
-        
-            .car-light {
-            position: absolute;
-            top: 10px;
-            right: 5px;
-            width: 10px;
-            height: 6px;
-            background: #ffdd59;
-            border-radius: 3px;
-            box-shadow: 0 0 10px 2px rgba(255, 221, 89, 0.6);
-            animation: lightFlash 1s infinite;
-            }
-        
-            /* Estilo das rodas */
-            .wheel {
-            position: absolute;
-            width: 26px;
-            height: 26px;
-            bottom: -13px;
-            background: #333;
-            border-radius: 50%;
-            animation: wheelRotate 2s infinite linear;
-            }
+                .car-light {
+                position: absolute;
+                top: 10px;
+                right: 5px;
+                width: 10px;
+                height: 6px;
+                background: #ffdd59;
+                border-radius: 3px;
+                box-shadow: 0 0 10px 2px rgba(255, 221, 89, 0.6);
+                animation: lightFlash 1s infinite;
+                }
             
-            .wheel-left {
-            left: 15px;
-            }
-        
-            .wheel-right {
-            right: 15px;
-            }
+                /* Estilo das rodas */
+                .wheel {
+                position: absolute;
+                width: 26px;
+                height: 26px;
+                bottom: -13px;
+                background: #333;
+                border-radius: 50%;
+                animation: wheelRotate 2s infinite linear;
+                }
+                
+                .wheel-left {
+                left: 15px;
+                }
             
-            .wheel-inner {
-            position: absolute;
-            width: 12px;
-            height: 12px;
-            top: 7px;
-            left: 7px;
-            background: #666;
-            border-radius: 50%;
-            }
-        
-            /* Estilo da estrada */
-            .road {
-            position: absolute;
-            width: 300px;
-            height: 10px;
-            bottom: 50px;
-            background: #333;
-            border-radius: 3px;
-            }
+                .wheel-right {
+                right: 15px;
+                }
+                
+                .wheel-inner {
+                position: absolute;
+                width: 12px;
+                height: 12px;
+                top: 7px;
+                left: 7px;
+                background: #666;
+                border-radius: 50%;
+                }
             
-            .line {
-            position: absolute;
-            height: 4px;
-            width: 30px;
-            background: #fff;
-            top: 3px;
-            animation: lineMove 1.5s infinite linear;
-            }
-        
-            .line-1 { left: 30px; animation-delay: 0s; }
-            .line-2 { left: 100px; animation-delay: 0.3s; }
-            .line-3 { left: 170px; animation-delay: 0.6s; }
-            .line-4 { left: 240px; animation-delay: 0.9s; }
+                /* Estilo da estrada */
+                .road {
+                position: absolute;
+                width: 300px;
+                height: 10px;
+                bottom: 50px;
+                background: #333;
+                border-radius: 3px;
+                }
+                
+                .line {
+                position: absolute;
+                height: 4px;
+                width: 30px;
+                background: #fff;
+                top: 3px;
+                animation: lineMove 1.5s infinite linear;
+                }
             
-            /* Estilo do escudo (símbolo de seguro) */
-            .shield {
-            position: absolute;
-            width: 40px;
-            height: 50px;
-            top: 30px;
-            left: 130px;
-            background: rgba(0, 175, 158, 0.3);
-            border: 2px solid #00af9e;
-            border-radius: 50% 50% 0 50%;
-            transform: rotate(45deg);
-            animation: shieldPulse 2s infinite;
-            }
-        
-            .shield-icon {
-            position: absolute;
-            top: 12px;
-            left: 12px;
-            width: 16px;
-            height: 16px;
-            border-right: 3px solid #fff;
-            border-bottom: 3px solid #fff;
-            transform: rotate(45deg);
-            }
+                .line-1 { left: 30px; animation-delay: 0s; }
+                .line-2 { left: 100px; animation-delay: 0.3s; }
+                .line-3 { left: 170px; animation-delay: 0.6s; }
+                .line-4 { left: 240px; animation-delay: 0.9s; }
+                
+                /* Estilo do escudo (símbolo de seguro) */
+                .shield {
+                position: absolute;
+                width: 40px;
+                height: 50px;
+                top: 30px;
+                left: 130px;
+                background: rgba(0, 175, 158, 0.3);
+                border: 2px solid #00af9e;
+                border-radius: 50% 50% 0 50%;
+                transform: rotate(45deg);
+                animation: shieldPulse 2s infinite;
+                }
             
-            /* Barra de progresso e texto */
-            .status-text {
-            color: white;
-            font-size: 20px;
-            text-align: center;
-            margin-top: 30px;
-            margin-bottom: 20px;
-            }
-        
-            .progress-container {
-            width: 300px;
-            height: 8px;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 10px;
-            overflow: hidden;
-            }
+                .shield-icon {
+                position: absolute;
+                top: 12px;
+                left: 12px;
+                width: 16px;
+                height: 16px;
+                border-right: 3px solid #fff;
+                border-bottom: 3px solid #fff;
+                transform: rotate(45deg);
+                }
+                
+                /* Barra de progresso e texto */
+                .status-text {
+                color: white;
+                font-size: 20px;
+                text-align: center;
+                margin-top: 30px;
+                margin-bottom: 20px;
+                }
             
-            .progress-bar {
-            height: 100%;
-            width: 0%;
-            background: linear-gradient(90deg, #00af9e, #00e5cc);
-            border-radius: 10px;
-            transition: width 0.5s ease;
-            }
-        
-            /* Animações */
-            @keyframes carBounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-3px); }
-            }
+                .progress-container {
+                width: 300px;
+                height: 8px;
+                background: rgba(255, 255, 255, 0.2);
+                border-radius: 10px;
+                overflow: hidden;
+                }
+                
+                .progress-bar {
+                height: 100%;
+                width: 0%;
+                background: linear-gradient(90deg, #00af9e, #00e5cc);
+                border-radius: 10px;
+                transition: width 0.5s ease;
+                }
             
-            @keyframes wheelRotate {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-            }
-            
-            @keyframes lineMove {
-            0% { opacity: 0; transform: translateX(50px); }
-            50% { opacity: 1; }
-            100% { opacity: 0; transform: translateX(-50px); }
-            }
-            
-            @keyframes lightFlash {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-            }
-            
-            @keyframes shieldPulse {
-            0%, 100% { opacity: 0.7; transform: rotate(45deg) scale(1); }
-            50% { opacity: 1; transform: rotate(45deg) scale(1.1); }
-            }`;
+                /* Animações */
+                @keyframes carBounce {
+                0%, 100% { transform: translateY(0); }
+                50% { transform: translateY(-3px); }
+                }
+                
+                @keyframes wheelRotate {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+                }
+                
+                @keyframes lineMove {
+                0% { opacity: 0; transform: translateX(50px); }
+                50% { opacity: 1; }
+                100% { opacity: 0; transform: translateX(-50px); }
+                }
+                
+                @keyframes lightFlash {
+                0%, 100% { opacity: 1; }
+                50% { opacity: 0.5; }
+                }
+                
+                @keyframes shieldPulse {
+                0%, 100% { opacity: 0.7; transform: rotate(45deg) scale(1); }
+                50% { opacity: 1; transform: rotate(45deg) scale(1.1); }
+                }
+            `;
             document.head.appendChild(styleElement);
 
             const messages = [
@@ -2727,7 +2746,9 @@ if (isset($_SESSION["error"])) {
 
         function moveToNextStepCampanha(radio) {
             const valorSelecionado = radio.value;
+            id_campanha_selecionada = radio.id; // Define o ID da campanha selecionada
             console.log("Campanha selecionada:", valorSelecionado);
+            console.log("Id selecionado:", radio.id);
 
             const next = document.querySelector('.next-step');
             if (next) {

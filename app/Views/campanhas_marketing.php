@@ -1,16 +1,11 @@
 <?php
 session_start();
-if (isset($_SESSION["success"])) {
-    echo "<div class='alert alert-success' style='
-    text-align: center;
-    background: green;
-    color: #fff;
-'>" . $_SESSION["success"] . "</div>";
-    unset($_SESSION["success"]);
-}
-if (isset($_SESSION["error"])) {
-    echo "<div class='alert alert-danger'>" . $_SESSION["error"] . "</div>";
-    unset($_SESSION["error"]);
+
+// Verifica se o usuário está autenticado
+if (empty($_SESSION['user'])) {
+    // Redireciona para a página de login
+    header('Location: /simulador/login');
+    exit;
 }
 ?>
 
@@ -20,10 +15,13 @@ if (isset($_SESSION["error"])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Categoria</title>
+    <title>Campanhas de Marketing</title>
     <link rel="stylesheet" href="public/css/styles.css">
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- SweetAlert2 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         .modal {
             display: none;
@@ -34,7 +32,6 @@ if (isset($_SESSION["error"])) {
             width: 100%;
             height: 100%;
             overflow: auto;
-            background-color: rgb(0, 0, 0);
             background-color: rgba(0, 0, 0, 0.4);
             padding-top: 60px;
         }
@@ -86,60 +83,42 @@ if (isset($_SESSION["error"])) {
             margin-bottom: 5px;
         }
 
-        input, select {
+        input,
+        select {
             margin-bottom: 15px;
             padding: 10px;
             border: 1px solid #ccc;
             border-radius: 5px;
         }
 
-        /*  */
-        /*  */
         .form-row {
             display: flex;
             flex-wrap: wrap;
-            /* Permite que os itens se movam para a linha seguinte se não houver espaço */
             margin-bottom: 15px;
-            /* Espaçamento entre as linhas */
         }
 
         .form-group {
             flex: 1;
-            /* Cada grupo ocupa o mesmo espaço */
             min-width: 250px;
-            /* Largura mínima para cada grupo */
             margin-right: 20px;
-            /* Espaçamento à direita */
         }
 
         .form-group:last-child {
             margin-right: 0;
-            /* Remove o espaçamento do último grupo na linha */
-        }
-
-        label {
-            display: block;
-            /* Faz o label ocupar toda a largura */
-            margin-bottom: 5px;
-            /* Espaçamento abaixo do label */
         }
 
         input[type="number"],
         input[type="date"],
-        input[type="text"], select {
+        input[type="text"],
+        select {
             width: 100%;
-            /* Ocupar toda a largura do grupo */
             padding: 8px;
-            /* Espaçamento interno */
             box-sizing: border-box;
-            /* Inclui padding e border no cálculo da largura */
         }
 
         button {
             margin-top: 10px;
-            /* Espaçamento acima do botão */
             padding: 10px 15px;
-            /* Espaçamento interno do botão */
         }
     </style>
 </head>
@@ -147,57 +126,15 @@ if (isset($_SESSION["error"])) {
 <body>
     <div class="container">
         <!-- Sidebar menu -->
-        <div class="sidebar">
-            <div class="logo">
-                <h2>Logo</h2>
-            </div>
-            <div class="menu-item has-submenu" data-section="categorias">
-                <i class="fas fa-car"></i> Simulador auto
-                <i class="fas fa-chevron-right menu-arrow open"></i>
-            </div>
-            <!-- Submenu for Categorias -->
-            <div class="submenu ">
-                <div class="submenu-item" data-section="categoria-suv">
-                    <a href="/simulador/carCategory">Categorias dos Carros</a>
-                </div>
-                <div class="submenu-item" data-section="categoria-sedan">
-                    <a href="/simulador/carModel">Modelos dos Carros</a>
-                </div>
-                <div class="submenu-item" data-section="categoria-picape">
-                    <a href="/simulador/imposto">Imposto</a>
-                </div>
-                <div class="submenu-item" data-section="categoria-picape">
-                    <a href="/simulador/category">category</a>
-                </div>
-            </div>
-            <div class="menu-item" data-section="modelos">
-                <i class="fas fa-car"></i> Modelos dos Carros
-            </div>
-            <div class="menu-item active" data-section="campanhas">
-                <a classe="menu-item-a" style=" color: #fff; text-decoration: none; "
-                    href="/simulador/CampanhaMarketing"><i class="fas fa-bullhorn"></i> Campanhas de Marketing</a>
-            </div>
-            <div class="menu-item" data-section="imposto">
-                <a href="/simulador/imposto" style=" color: #fff; text-decoration: none; "><i class="fas fa-file-invoice-dollar"></i> Imposto</a>
-            </div>
-            <div class="menu-item" data-section="subscritor">
-                <i class="fas fa-users"></i> Subscritor
-            </div>
-            <div class="menu-item" data-section="usuario">
-                <i class="fas fa-user-shield"></i> Usuário
-            </div>
-        </div>
+
+        <?php include 'includes/sidebar.php'; ?>
 
         <!-- Main content -->
         <div class="main-content">
-            <div class="header">
-                <h1 class="page-title">SUV</h1>
-                <div class="user-info">
-                    <span>Bem-vindo, Admin</span>
-                </div>
-            </div>
 
-            <button class="btn btn-primary btn btn-tarifa" id="myBtn">Abrir Formulário</button>
+            <?php include 'includes/header.php'; ?>
+
+            <button class="btn btn-primary" id="myBtn">Abrir Formulário</button>
 
             <div class="table-container" style="margin-top: 20px;">
                 <table>
@@ -206,9 +143,9 @@ if (isset($_SESSION["error"])) {
                             <th>ID</th>
                             <th>Nome</th>
                             <th>Percentagem</th>
-                            <th>Data inicio</th>
-                            <th>Data final</th>
-                            <th>Seguro</th>
+                            <th>Data Início</th>
+                            <th>Data Fim</th>
+                            <th>Tipo Seguro</th>
                             <th>Ações</th>
                         </tr>
                     </thead>
@@ -222,7 +159,15 @@ if (isset($_SESSION["error"])) {
                                 <td><?= htmlspecialchars($campanha["data_fim"]) ?></td>
                                 <td><?= htmlspecialchars($campanha["tipo_seguro"]) ?></td>
                                 <td>
-                                    <button class="btn-edit" data-id="<?= $campanha["id"] ?>">Editar</button>
+                                    <button class="btn-edit" 
+                                        data-id="<?= $campanha["id"] ?>" 
+                                        data-nome="<?= htmlspecialchars($campanha["nome"]) ?>" 
+                                        data-percentagem="<?= htmlspecialchars($campanha["percentagem"]) ?>" 
+                                        data-data-inicio="<?= htmlspecialchars($campanha["data_inicio"]) ?>" 
+                                        data-data-fim="<?= htmlspecialchars($campanha["data_fim"]) ?>" 
+                                        data-tipo-seguro="<?= htmlspecialchars($campanha["tipo_seguro"]) ?>">
+                                        Editar
+                                    </button>
                                     <button class="btn-delete" data-id="<?= $campanha["id"] ?>">Excluir</button>
                                 </td>
                             </tr>
@@ -231,38 +176,38 @@ if (isset($_SESSION["error"])) {
                 </table>
             </div>
 
-            <div id="myModal1" class="modal" style="padding-top: 0;">
+            <!-- Modal para cadastrar campanha -->
+            <div id="myModal" class="modal">
                 <div class="modal-content" style="max-width: 600px;">
                     <span class="close">&times;</span>
-                    <h2>Adicionar Campanha de Marketing</h2>
-                    <form id="tarifaForm" action="CampanhaMarketing/create" method="post">
+                    <h2>Adicionar Campanha</h2>
+                    <form action="CampanhaMarketing/create" method="post">
                         <div class="form-row">
                             <div class="form-group">
-                                <label for="nome">Nome da Campanha:</label>
-                                <input type="text" id="nome" name="nome">
+                                <label for="nome">Nome:</label>
+                                <input type="text" id="nome" name="nome" required>
                             </div>
                             <div class="form-group">
-                                <label for="percentagem">percentagem de desconto:</label>
-                                <input type="text" id="percentagem" name="percentagem" pattern="^-?\d+([.,]\d+)?$"
-                                    title="Por favor, insira um número válido (ex: 25,50 ou 25.50)">
+                                <label for="percentagem">Percentagem:</label>
+                                <input type="text" id="percentagem" name="percentagem" required>
                             </div>
                         </div>
                         <div class="form-row">
                             <div class="form-group">
-                                <label for="data_inicio">Data de Incio:</label>
-                                <input type="date" id="data_inicio" name="data_inicio">
+                                <label for="data_inicio">Data Início:</label>
+                                <input type="date" id="data_inicio" name="data_inicio" required>
                             </div>
                             <div class="form-group">
-                                <label for="data_fim">Data de Fim:</label>
-                                <input type="date" id="data_fim" name="data_fim">
+                                <label for="data_fim">Data Fim:</label>
+                                <input type="date" id="data_fim" name="data_fim" required>
                             </div>
                         </div>
                         <div class="form-row">
                             <div class="form-group">
-                                <label for="tipo_seguro">Tipo de seguro:</label>
-                                <select name="tipo_seguro" id="tipo_seguro">
-                                    <option value="auto">auto</option>
-                                    <option value="viagem">viagem</option>
+                                <label for="tipo_seguro">Tipo Seguro:</label>
+                                <select id="tipo_seguro" name="tipo_seguro" required>
+                                    <option value="auto">Auto</option>
+                                    <option value="viagem">Viagem</option>
                                 </select>
                             </div>
                         </div>
@@ -270,63 +215,243 @@ if (isset($_SESSION["error"])) {
                     </form>
                 </div>
             </div>
+            <!-- Fim do modal -->
 
-            <!--  -->
-
+            <!-- Modal para editar campanha -->
+            <div id="editModal" class="modal">
+                <div class="modal-content" style="max-width: 600px;">
+                    <span class="close">&times;</span>
+                    <h2>Editar Campanha</h2>
+                    <form id="editForm" action="CampanhaMarketing/update" method="post">
+                        <input type="hidden" id="edit-id" name="id">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="edit-nome">Nome:</label>
+                                <input type="text" id="edit-nome" name="nome" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="edit-percentagem">Percentagem:</label>
+                                <input type="text" id="edit-percentagem" name="percentagem" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="edit-data_inicio">Data Início:</label>
+                                <input type="date" id="edit-data_inicio" name="data_inicio" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="edit-data_fim">Data Fim:</label>
+                                <input type="date" id="edit-data_fim" name="data_fim" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="edit-tipo_seguro">Tipo Seguro:</label>
+                                <select id="edit-tipo_seguro" name="tipo_seguro" required>
+                                    <option value="auto">Auto</option>
+                                    <option value="viagem">Viagem</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button type="submit">Salvar Alterações</button>
+                    </form>
+                </div>
+            </div>
+            <!-- Fim do modal -->
         </div>
     </div>
 
-
-    <script src="public/js/main.js"></script>
     <script src="public/js/jquery.js"></script>
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-            // Modal para criar categoria
-            // const modal = document.getElementById("myModal");
-            // const btn = document.getElementById("myBtn");
-            // const closeBtn = modal.querySelector(".close");
-
-            // btn.onclick = function() {
-            //     modal.style.display = "block";
-            // };
-
-            // closeBtn.onclick = function() {
-            //     modal.style.display = "none";
-            // };
-
-            // window.onclick = function(event) {
-            //     if (event.target === modal) {
-            //         modal.style.display = "none";
-            //     }
-            // };
-
-            // Modal para adicionar tarifas
-            const modalTarifa = document.getElementById("myModal1");
-            const btnsTarifa = document.querySelector(".btn-tarifa");
-            const closeBtnTarifa = modalTarifa.querySelector(".close");
-
-            // btnsTarifa.forEach((btn) => {
-            btnsTarifa.addEventListener("click", function() {
-                // const categoriaId = this.getAttribute("data-id");
-                // const nomeCategoria = this.getAttribute("data-nome");
-
-                // document.getElementById("categoria_id").value = categoriaId;
-                // document.getElementById("nome_categoria").value = nomeCategoria;
-
-                console.log(btnsTarifa)
-                modalTarifa.style.display = "block";
+            // Abre o modal quando o botão for clicado
+            document.getElementById("myBtn").addEventListener("click", function() {
+                document.getElementById("myModal").style.display = "block";
             });
-            // });
 
-            closeBtnTarifa.onclick = function() {
-                modalTarifa.style.display = "none";
-            };
+            // Fecha o modal quando o botão de fechar for clicado
+            document.querySelector(".close").addEventListener("click", function() {
+                document.getElementById("myModal").style.display = "none";
+            });
 
-            window.onclick = function(event) {
-                if (event.target === modalTarifa) {
-                    modalTarifa.style.display = "none";
+            // Fecha o modal se o usuário clicar fora dele
+            window.addEventListener("click", function(event) {
+                if (event.target === document.getElementById("myModal")) {
+                    document.getElementById("myModal").style.display = "none";
                 }
-            };
+            });
+
+            // Abre o modal de edição com os dados da campanha
+            document.querySelectorAll(".btn-edit").forEach(function (button) {
+                button.addEventListener("click", function () {
+                    const id = this.getAttribute("data-id");
+                    const nome = this.getAttribute("data-nome");
+                    const percentagem = this.getAttribute("data-percentagem");
+                    const dataInicio = this.getAttribute("data-data-inicio");
+                    const dataFim = this.getAttribute("data-data-fim");
+                    const tipoSeguro = this.getAttribute("data-tipo-seguro");
+
+                    // Preenche os campos do modal com os dados da campanha
+                    document.getElementById("edit-id").value = id;
+                    document.getElementById("edit-nome").value = nome;
+                    document.getElementById("edit-percentagem").value = percentagem;
+                    document.getElementById("edit-data_inicio").value = dataInicio;
+                    document.getElementById("edit-data_fim").value = dataFim;
+                    document.getElementById("edit-tipo_seguro").value = tipoSeguro;
+
+                    // Exibe o modal
+                    document.getElementById("editModal").style.display = "block";
+                });
+            });
+
+            // Fecha o modal de edição
+            document.querySelector("#editModal .close").addEventListener("click", function () {
+                document.getElementById("editModal").style.display = "none";
+            });
+
+            // Fecha o modal se o usuário clicar fora dele
+            window.addEventListener("click", function (event) {
+                if (event.target === document.getElementById("editModal")) {
+                    document.getElementById("editModal").style.display = "none";
+                }
+            });
+
+            // Evento para o botão de exclusão
+            document.querySelectorAll(".btn-delete").forEach(function (button) {
+                button.addEventListener("click", function () {
+                    const id = this.getAttribute("data-id");
+
+                    // Confirmação antes de excluir
+                    Swal.fire({
+                        title: 'Tem certeza?',
+                        text: "Você não poderá reverter esta ação!",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#3085d6',
+                        cancelButtonColor: '#d33',
+                        confirmButtonText: 'Sim, excluir!',
+                        cancelButtonText: 'Cancelar'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            // Enviar requisição para o backend
+                            fetch(`CampanhaMarketing/delete/${id}`, {
+                                method: "POST",
+                            })
+                            .then(response => {
+                                if (!response.ok) {
+                                    throw new Error("Erro na requisição: " + response.status);
+                                }
+                                return response.json(); // Converte a resposta para JSON
+                            })
+                            .then(data => {
+                                if (data.success) {
+                                    Swal.fire(
+                                        'Excluído!',
+                                        data.message,
+                                        'success'
+                                    ).then(() => location.reload()); // Recarrega a página após o alerta
+                                } else {
+                                    Swal.fire(
+                                        'Erro!',
+                                        data.message,
+                                        'error'
+                                    );
+                                }
+                            })
+                            .catch(error => {
+                                console.error("Erro ao excluir a campanha:", error);
+                                Swal.fire(
+                                    'Erro!',
+                                    'Erro ao excluir a campanha. Verifique os logs.',
+                                    'error'
+                                );
+                            });
+                        }
+                    });
+                });
+            });
+
+            // Evento para o envio do formulário de cadastro
+            document.querySelector("#myModal form").addEventListener("submit", function (event) {
+                event.preventDefault(); // Impede o envio padrão do formulário
+
+                const formData = new FormData(this);
+
+                fetch("CampanhaMarketing/create", {
+                    method: "POST",
+                    body: formData
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error("Erro na requisição: " + response.status);
+                    }
+                    return response.json(); // Converte a resposta para JSON
+                })
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire(
+                            'Sucesso!',
+                            data.message,
+                            'success'
+                        ).then(() => location.reload()); // Recarrega a página após o alerta
+                    } else {
+                        Swal.fire(
+                            'Erro!',
+                            data.message,
+                            'error'
+                        );
+                    }
+                })
+                .catch(error => {
+                    console.error("Erro ao cadastrar a campanha:", error);
+                    Swal.fire(
+                        'Erro!',
+                        'Erro ao cadastrar a campanha. Verifique os logs.',
+                        'error'
+                    );
+                });
+            });
+
+            // Evento para o envio do formulário de edição
+            document.querySelector("#editForm").addEventListener("submit", function (event) {
+                event.preventDefault(); // Impede o envio padrão do formulário
+
+                const formData = new FormData(this);
+
+                fetch("CampanhaMarketing/update", {
+                    method: "POST",
+                    body: formData
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error("Erro na requisição: " + response.status);
+                    }
+                    return response.json(); // Converte a resposta para JSON
+                })
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire(
+                            'Sucesso!',
+                            data.message,
+                            'success'
+                        ).then(() => location.reload()); // Recarrega a página após o alerta
+                    } else {
+                        Swal.fire(
+                            'Erro!',
+                            data.message,
+                            'error'
+                        );
+                    }
+                })
+                .catch(error => {
+                    console.error("Erro ao atualizar a campanha:", error);
+                    Swal.fire(
+                        'Erro!',
+                        'Erro ao atualizar a campanha. Verifique os logs.',
+                        'error'
+                    );
+                });
+            });
         });
     </script>
 </body>

@@ -54,21 +54,21 @@ class CampanhaMarketing
         }
     }
 
-    public function atualizar($id, $nome, $descricao, $dataInicio, $dataFim, $orcamento)
+    public function atualizar($id, $nome, $dataInicio, $dataFim, $percentagem, $tipoSeguro)
     {
         try {
             $query = "UPDATE " . $this->table_name . " 
-                      SET nome = :nome, descricao = :descricao, data_inicio = :data_inicio, 
-                          data_fim = :data_fim, orcamento = :orcamento
+                      SET nome = :nome, data_inicio = :data_inicio, data_fim = :data_fim, 
+                          percentagem = :percentagem, tipo_seguro = :tipo_seguro 
                       WHERE id = :id";
 
             $stmt = $this->conn->prepare($query);
             $stmt->bindParam(":id", $id, PDO::PARAM_INT);
             $stmt->bindParam(":nome", $nome, PDO::PARAM_STR);
-            $stmt->bindParam(":descricao", $descricao, PDO::PARAM_STR);
             $stmt->bindParam(":data_inicio", $dataInicio, PDO::PARAM_STR);
             $stmt->bindParam(":data_fim", $dataFim, PDO::PARAM_STR);
-            $stmt->bindParam(":orcamento", $orcamento, PDO::PARAM_STR);
+            $stmt->bindParam(":percentagem", $percentagem, PDO::PARAM_STR);
+            $stmt->bindParam(":tipo_seguro", $tipoSeguro, PDO::PARAM_STR);
 
             if ($stmt->execute()) {
                 return ["success" => true];
@@ -76,7 +76,8 @@ class CampanhaMarketing
                 return ["success" => false, "error" => "Erro ao executar a query."];
             }
         } catch (PDOException $e) {
-            return ["success" => false, "error" => "Erro no banco de dados: " . $e->getMessage()];
+            error_log("Erro ao atualizar campanha: " . $e->getMessage());
+            return ["success" => false, "error" => $e->getMessage()];
         }
     }
 

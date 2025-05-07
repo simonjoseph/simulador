@@ -51,25 +51,34 @@ class CampanhaMarketingController extends Controller {
         $this->view('campanha_edit', $data);
     }
 
-    public function update() {
-        if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["id"])) {
-            session_start();
-            $id = intval($_POST["id"]);
-            $nome = htmlspecialchars($_POST["nome"], ENT_QUOTES, "UTF-8");
-            $descricao = htmlspecialchars($_POST["descricao"], ENT_QUOTES, "UTF-8");
-            $dataInicio = htmlspecialchars($_POST["data_inicio"], ENT_QUOTES, "UTF-8");
-            $dataFim = htmlspecialchars($_POST["data_fim"], ENT_QUOTES, "UTF-8");
-            $orcamento = htmlspecialchars($_POST["orcamento"], ENT_QUOTES, "UTF-8");
+    public function update()
+    {
+        if ($_SERVER["REQUEST_METHOD"] === "POST") {
+            // Obtenha os dados do formulário
+            $id = $_POST["id"];
+            $nome = $_POST["nome"];
+            $percentagem = $_POST["percentagem"];
+            $dataInicio = $_POST["data_inicio"];
+            $dataFim = $_POST["data_fim"];
+            $tipoSeguro = $_POST["tipo_seguro"];
 
-            if (!empty($nome) && !empty($dataInicio) && !empty($dataFim) && !empty($orcamento)) {
-                $resultado = $this->modelo->atualizar($id, $nome, $descricao, $dataInicio, $dataFim, $orcamento);
+            // Chame o modelo para atualizar a campanha
+            $resultado = $this->modelo->atualizar($id, $nome, $dataInicio, $dataFim, $percentagem, $tipoSeguro);
 
-                $_SESSION[$resultado["success"] ? "success" : "error"] = 
-                    $resultado["success"] ? "Campanha atualizada com sucesso!" : "Erro ao atualizar: " . $resultado["error"];
-
-                header('Location: /simulador/campanha-marketing');
-                exit;
+            // Retorne uma resposta JSON
+            header('Content-Type: application/json'); // Define o cabeçalho como JSON
+            if ($resultado["success"]) {
+                echo json_encode(["success" => true, "message" => "Campanha atualizada com sucesso!"]);
+            } else {
+                echo json_encode(["success" => false, "message" => $resultado["error"]]);
             }
+            exit;
+        } else {
+            // Método não permitido
+            http_response_code(405);
+            header('Content-Type: application/json');
+            echo json_encode(["success" => false, "message" => "Método não permitido."]);
+            exit;
         }
     }
 

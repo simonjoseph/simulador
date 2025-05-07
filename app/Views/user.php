@@ -1,3 +1,26 @@
+<?php
+session_start();
+
+// Verifica se o usuário está autenticado
+if (empty($_SESSION['user'])) {
+    // Redireciona para a página de login
+    header('Location: /simulador/login');
+    exit;
+}
+
+if (isset($_SESSION["success"])) {
+    echo "<div class='alert alert-success' style='
+    text-align: center;
+    background: green;
+    color: #fff;
+'>" . $_SESSION["success"] . "</div>";
+    unset($_SESSION["success"]);
+}
+if (isset($_SESSION["error"])) {
+    echo "<div class='alert alert-danger'>" . $_SESSION["error"] . "</div>";
+    unset($_SESSION["error"]);
+}
+?>
 <!DOCTYPE html>
 <html lang="pt-br">
 
@@ -13,52 +36,11 @@
 <body>
     <div class="container">
         <!-- Sidebar menu -->
-        <div class="sidebar">
-            <div class="logo">
-                <h2>Logo</h2>
-            </div>
-            <div class="menu-item has-submenu active" data-section="categorias">
-                <i class="fas fa-car"></i> Simulador auto
-                <i class="fas fa-chevron-right menu-arrow open"></i>
-            </div>
-            <!-- Submenu for Categorias -->
-            <div class="submenu open">
-                <div class="submenu-item active" data-section="categoria-suv">
-                    <a href="/simulador/carCategory">Categorias dos Carros</a>
-                </div>
-                <div class="submenu-item" data-section="categoria-sedan">
-                    <a href="/simulador/carModel">Mnodelos dos Carros</a>
-                </div>
-                <div class="submenu-item" data-section="categoria-picape">
-                    <a href="/simulador/imposto">Imposto</a>
-                </div>
-            </div>
-            <div class="menu-item" data-section="modelos">
-                <i class="fas fa-car"></i> Modelos dos Carros
-            </div>
-            <div class="menu-item" data-section="campanhas">
-                 <a classe="menu-item-a"  style=" color: #fff; text-decoration: none; " 
- href="/simulador/CampanhaMarketing"><i class="fas fa-bullhorn"></i> Campanhas de Marketing</a>
-            </div>
-            <div class="menu-item" data-section="imposto">
-                <i class="fas fa-file-invoice-dollar"></i> Imposto
-            </div>
-            <div class="menu-item" data-section="subscritor">
-                <i class="fas fa-users"></i> Subscritor
-            </div>
-            <div class="menu-item" data-section="usuario">
-                <i class="fas fa-user-shield"></i> Usuário
-            </div>
-        </div>
-
+        <?php include 'includes/sidebar.php'; ?>
         <!-- Main content -->
         <div class="main-content">
-            <div class="header">
-                <h1 class="page-title">SUV</h1>
-                <div class="user-info">
-                    <span>Bem-vindo, Admin</span>
-                </div>
-            </div>
+            
+            <?php include 'includes/header.php'; ?>
 
             <!-- SUV Section -->
             <div class="content-section active" id="categoria-suv">

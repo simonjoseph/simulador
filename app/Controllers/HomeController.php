@@ -30,49 +30,29 @@ class HomeController extends Controller
         $this->simulacao = new Simulacao();
     }
 
-    // public function index()
-    // {
-    //     $impostos = $this->modelo->listarImpostos();
-    //     $tarifas = $this->modeloTarifa->listarTarifasPorCategoria();
-    //     $modeloMarketing = $this->modeloMarketing->listar();
-    //     $modeloCategorias = $this->modeloCategorias->listar();
-
-    //     // print_r($modeloCategorias);
-    //     // exit;
-    //     $data = [
-    //         "title" => "Bem-vindo ao Simulador",
-    //         "impostos" => $impostos,
-    //         "tarifas" => $tarifas,
-    //         "campanhas" => $modeloMarketing,
-    //         "modeloCategorias" => $modeloCategorias
-    //     ];
-    //     $this->view('home', $data);
-    // }
-
     public function index()
-{
-    $impostos = $this->modelo->listarImpostos();
-    $tarifas = $this->modeloTarifa->listarTarifasPorCategoria();
-    $modeloMarketing = $this->modeloMarketing->listar();
-    $modeloCategorias = $this->modeloCategorias->listar();
+    {
+        $impostos = $this->modelo->listarImpostos();
+        $tarifas = $this->modeloTarifa->listarTarifasPorCategoria();
+        $modeloMarketing = $this->modeloMarketing->listar();
+        $modeloCategorias = $this->modeloCategorias->listar();
 
-    // Filtrar campanhas no intervalo de datas
-    $dataHoje = date('Y-m-d'); // Obtém a data de hoje no formato YYYY-MM-DD
-    $campanhasFiltradas = array_filter($modeloMarketing, function($campanha) use ($dataHoje) {
-        return $campanha['data_inicio'] <= $dataHoje && $campanha['data_fim'] >= $dataHoje;
-    });
+        // Filtrar campanhas no intervalo de datas
+        $dataHoje = date('Y-m-d'); // Obtém a data de hoje no formato YYYY-MM-DD
+        $campanhasFiltradas = array_filter($modeloMarketing, function($campanha) use ($dataHoje) {
+            return $campanha['data_inicio'] <= $dataHoje && $campanha['data_fim'] >= $dataHoje;
+        });
 
-    $data = [
-        "title" => "Bem-vindo ao Simulador",
-        "impostos" => $impostos,
-        "tarifas" => $tarifas,
-        "campanhas" => $campanhasFiltradas, // Usar campanhas filtradas
-        "modeloCategorias" => $modeloCategorias
-    ];
-    
-    $this->view('home', $data);
-}
-
+        $data = [
+            "title" => "Bem-vindo ao Simulador",
+            "impostos" => $impostos,
+            "tarifas" => $tarifas,
+            "campanhas" => $campanhasFiltradas, // Usar campanhas filtradas
+            "modeloCategorias" => $modeloCategorias
+        ];
+        
+        $this->view('home', $data);
+    }
 
     public function create()
     {
@@ -81,6 +61,20 @@ class HomeController extends Controller
                 session_start();
             }
 
+            // Verificar se o campo campanha_id foi enviado
+            $campanha_id = null; // Valor padrão é null
+            if (isset($_POST["campanha_id"]) && $_POST["campanha_id"] !== "") {
+                $campanha_id = htmlspecialchars($_POST["campanha_id"], ENT_QUOTES, "UTF-8");
+            }
+
+            if($_POST["campanha_id"] == "semCampanha") {
+                $campanha_id = null; 
+            }
+
+            // Exemplo de depuração
+            error_log("campanha_id recebido: " . ($campanha_id ?? "null"));
+
+            // Sanitizar os outros dados recebidos
             $nome = htmlspecialchars($_POST["nome"], ENT_QUOTES, "UTF-8");
             $email = htmlspecialchars($_POST["email"], ENT_QUOTES, "UTF-8");
             $nif = htmlspecialchars($_POST["nif"], ENT_QUOTES, "UTF-8");
@@ -96,18 +90,15 @@ class HomeController extends Controller
             $premio_rc_legal = htmlspecialchars($_POST["premio_rc_legal"], ENT_QUOTES, "UTF-8");
             $premio_comercial_rc = htmlspecialchars($_POST["premio_comercial_rc"], ENT_QUOTES, "UTF-8");
 
-
+            // Verificar se a categoria existe
             $id_categoria_exist = $this->modeloCategorias->verificar_existencia($id_categoria);
 
-            // Gerar a cotação ANTES de cadastrar
+            // Gerar a cotação
             $cotacao = $this->gerarCotacaoUnica();
-
-            // Adicionando log para acompanhar o valor da cotação
-            error_log("Cotação gerada: " . $cotacao);
 
             if (!empty($nome)) {
                 $resultado = $this->simulacao->cadastrar(
-                    $cotacao,  // Passamos a cotação já gerada
+                    $cotacao,
                     $nome,
                     $email,
                     $nif,
@@ -122,32 +113,25 @@ class HomeController extends Controller
                     $id_categoria_exist,
                     $id_categoria,
                     $premio_rc_legal,
-                    $premio_comercial_rc
+                    $premio_comercial_rc,
+                    $campanha_id // Pode ser null
                 );
 
-                // Verificar qual cotação foi realmente salva
-                $cotacaoSalva = $this->simulacao->obterUltimaCotacao();
-                error_log("Cotação salva no banco: " . $cotacaoSalva);
-
                 if ($resultado) {
-                    // Usar a cotação correta (a que foi realmente salva)
-                    $cotacaoFinal = $cotacaoSalva ?: $cotacao;
-
-                    // Em vez de redirecionar, retornamos um JSON com a URL para o cliente
                     header('Content-Type: application/json');
                     echo json_encode([
                         'success' => true,
-                        'cotacao' => $cotacaoFinal,
-                        'redirectUrl' => "/simulador/home/baixarPdf?cotacao=$cotacaoFinal"
+                        'cotacao' => $cotacao,
+                        'redirectUrl' => "/simulador/home/baixarPdf?cotacao=$cotacao"
                     ]);
-                    exit;
+                    exit();
                 } else {
                     header('Content-Type: application/json');
                     echo json_encode([
                         'success' => false,
-                        'message' => "Erro ao cadastrar."
+                        'message' => "Erro ao cadastrar."  . json_encode($_POST),
                     ]);
-                    exit;
+                    exit();
                 }
             } else {
                 header('Content-Type: application/json');
@@ -155,7 +139,7 @@ class HomeController extends Controller
                     'success' => false,
                     'message' => "Todos os campos são obrigatórios."
                 ]);
-                exit;
+                exit();
             }
         }
 
@@ -533,55 +517,40 @@ class HomeController extends Controller
         exit;
     }
 
-    // private function gerarCotacaoUnica()
-    // {
-    //     $timestamp = date("YmdHis"); // Formato: YYYYMMDDHHMMSS
-    //     $contador = 1;
-
-    //     $cotacaoUnica = $contador . $timestamp;
-
-    //     while ($this->simulacao->cotacaoExiste($cotacaoUnica)) {
-    //         $contador++;
-    //         $cotacaoUnica = $contador . $timestamp;
-    //     }
-
-    //     return $cotacaoUnica;
-    // }
-
     private function gerarCotacaoUnica()
-{
-    $anoAtual = date("Y"); // Obtém o ano atual (ex: 2025)
-    $base = 10000; // Número base para iniciar a contagem
-    
-    // Buscar a última cotação no banco de dados
-    $ultimaCotacao = $this->simulacao->obterUltimaCotacao();
-    
-    if ($ultimaCotacao) {
-        // Se existir uma cotação anterior, extrair o número sequencial
-        // Assumindo que o formato é YYYY10000, YYYY10001, etc.
-        $anoAnterior = substr($ultimaCotacao, 0, 4);
-        $numeroAnterior = (int)substr($ultimaCotacao, 4);
+    {
+        $anoAtual = date("Y"); // Obtém o ano atual (ex: 2025)
+        $base = 10000; // Número base para iniciar a contagem
         
-        if ($anoAnterior == $anoAtual) {
-            // Se for do mesmo ano, incrementa o número
-            $numeroSequencial = $numeroAnterior + 1;
+        // Buscar a última cotação no banco de dados
+        $ultimaCotacao = $this->simulacao->obterUltimaCotacao();
+        
+        if ($ultimaCotacao) {
+            // Se existir uma cotação anterior, extrair o número sequencial
+            // Assumindo que o formato é YYYY10000, YYYY10001, etc.
+            $anoAnterior = substr($ultimaCotacao, 0, 4);
+            $numeroAnterior = (int)substr($ultimaCotacao, 4);
+            
+            if ($anoAnterior == $anoAtual) {
+                // Se for do mesmo ano, incrementa o número
+                $numeroSequencial = $numeroAnterior + 1;
+            } else {
+                // Se for de um ano diferente, reinicia a contagem
+                $numeroSequencial = $base;
+            }
         } else {
-            // Se for de um ano diferente, reinicia a contagem
+            // Se não existir cotação anterior, começa do número base
             $numeroSequencial = $base;
         }
-    } else {
-        // Se não existir cotação anterior, começa do número base
-        $numeroSequencial = $base;
-    }
-    
-    $cotacaoUnica = $anoAtual . $numeroSequencial;
-    
-    // Verificar se já existe essa cotação (improvável, mas por segurança)
-    while ($this->simulacao->cotacaoExiste($cotacaoUnica)) {
-        $numeroSequencial++;
+        
         $cotacaoUnica = $anoAtual . $numeroSequencial;
+        
+        // Verificar se já existe essa cotação (improvável, mas por segurança)
+        while ($this->simulacao->cotacaoExiste($cotacaoUnica)) {
+            $numeroSequencial++;
+            $cotacaoUnica = $anoAtual . $numeroSequencial;
+        }
+        
+        return $cotacaoUnica;
     }
-    
-    return $cotacaoUnica;
-}
 }

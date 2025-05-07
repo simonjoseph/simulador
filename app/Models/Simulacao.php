@@ -12,13 +12,40 @@ class Simulacao
         $this->conn = $database->getConnection();
     }
 
-    public function listar()
+    // public function listar()
+    // {
+    //     $query = "SELECT * FROM " . $this->table_name;
+    //     $stmt = $this->conn->prepare($query);
+    //     $stmt->execute();
+    //     return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    // }
+
+    public function listar($deslocamento = 0, $limite = 20)
     {
-        $query = "SELECT * FROM " . $this->table_name;
+        // Prepara a consulta SQL com LIMIT e OFFSET
+        $query = "SELECT * FROM " . $this->table_name . " LIMIT :limite OFFSET :deslocamento";
         $stmt = $this->conn->prepare($query);
+
+        // Bind dos parâmetros
+        $stmt->bindValue(':limite', $limite, PDO::PARAM_INT);
+        $stmt->bindValue(':deslocamento', $deslocamento, PDO::PARAM_INT);
+
+        // Executa a consulta
         $stmt->execute();
+
+        // Retorna os resultados como um array associativo
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
+    public function contar()
+    {
+        $query = "SELECT COUNT(*) FROM " . $this->table_name;
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute();
+        return $stmt->fetchColumn();
+    }
+
+
 
     public function buscarPorId($id)
     {
@@ -29,13 +56,15 @@ class Simulacao
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    public function cadastrar($cotacao, $nome, $email, $nif, $contato, $endereco, $matricula, $marca, $modelo, $cilindrada, $ano_fabrico, $data_inicio, $id_categoria_exist, $id_categoria, $premio_rc_legal, $premio_comercial_rc)
+    public function cadastrar($cotacao, $nome, $email, $nif, $contato, $endereco, $matricula, $marca, $modelo, $cilindrada, $ano_fabrico, $data_inicio, $id_categoria_exist, $id_categoria, $premio_rc_legal, $premio_comercial_rc, $campanha_id)
     {
         try {
-            $query = "INSERT INTO " . $this->table_name . " (cotacao, nome, email, nif, contato, endereco, matricula, marca, modelo, cilindrada, ano_fabrico, data_inicio, id_categoria, nome_categoria, premio_rc_legal, premio_comercial_rc) 
-                      VALUES (:cotacao, :nome, :email, :nif, :contato, :endereco, :matricula, :marca, :modelo, :cilindrada, :ano_fabrico, :data_inicio, :id_categoria, :nome_categoria, :premio_rc_legal, :premio_comercial_rc)";
+            $query = "INSERT INTO " . $this->table_name . " (cotacao, nome, email, nif, contato, endereco, matricula, marca, modelo, cilindrada, ano_fabrico, data_inicio, id_categoria, nome_categoria, premio_rc_legal, premio_comercial_rc, id_campanha_marketing ) 
+                      VALUES (:cotacao, :nome, :email, :nif, :contato, :endereco, :matricula, :marca, :modelo, :cilindrada, :ano_fabrico, :data_inicio, :id_categoria, :nome_categoria, :premio_rc_legal, :premio_comercial_rc, :campanha_id)";
 
             $stmt = $this->conn->prepare($query);
+
+            // Bind dos parâmetros
             $stmt->bindParam(":cotacao", $cotacao, PDO::PARAM_STR);
             $stmt->bindParam(":nome", $nome, PDO::PARAM_STR);
             $stmt->bindParam(":email", $email, PDO::PARAM_STR);
@@ -53,8 +82,16 @@ class Simulacao
             $stmt->bindParam(":premio_rc_legal", $premio_rc_legal, PDO::PARAM_STR);
             $stmt->bindParam(":premio_comercial_rc", $premio_comercial_rc, PDO::PARAM_STR);
 
+            // Verificar se campanha_id é null
+            if ($campanha_id === null) {
+                $stmt->bindValue(":campanha_id", null, PDO::PARAM_NULL);
+            } else {
+                $stmt->bindParam(":campanha_id", $campanha_id, PDO::PARAM_STR);
+            }
+
             return $stmt->execute();
         } catch (PDOException $e) {
+            error_log("Erro ao cadastrar simulação: " . $e->getMessage());
             return false;
         }
     }

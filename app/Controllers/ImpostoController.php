@@ -16,27 +16,29 @@ class ImpostoController extends Controller {
     }
 
     public function create() {
-        if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["cambio"])) {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             session_start();
-            $cambio = htmlspecialchars($_POST["cambio"], ENT_QUOTES, "UTF-8");
-            $fga = htmlspecialchars($_POST["fga"], ENT_QUOTES, "UTF-8");
-            $iva = htmlspecialchars($_POST["iva"], ENT_QUOTES, "UTF-8");
-            $desconto = htmlspecialchars($_POST["desconto"], ENT_QUOTES, "UTF-8");
-            $cambio_geral = htmlspecialchars($_POST["cambio_geral"], ENT_QUOTES, "UTF-8");
 
-            if (!empty($cambio)) {
-                $resultado = $this->modelo->cadastrar($cambio, $fga, $iva, $desconto, $cambio_geral);
+            // Obtenha os dados do formulário
+            $cambio = $_POST['cambio'];
+            $fga = $_POST['fga'];
+            $iva = $_POST['iva'];
+            $desconto = $_POST['desconto'];
+            $cambioGeral = $_POST['cambio_geral'];
 
-                $_SESSION[$resultado ? "success" : "error"] = 
-                    $resultado ? "Imposto cadastrado com sucesso!" : "Erro ao cadastrar.";
+            // Salve os dados no banco de dados
+            $resultado = $this->modelo->cadastrar($cambio, $fga, $iva, $desconto, $cambioGeral);
 
-                header('Location: /simulador/imposto');
-                exit;
+            if ($resultado) {
+                echo json_encode(["success" => true, "message" => "Imposto cadastrado com sucesso!"]);
             } else {
-                $_SESSION["error"] = "Todos os campos são obrigatórios.";
-                header('Location: /simulador/imposto');
-                exit;
+                echo json_encode(["success" => false, "message" => "Erro ao cadastrar o imposto."]);
             }
+            exit;
+        } else {
+            http_response_code(405); // Método não permitido
+            echo json_encode(["success" => false, "message" => "Método não permitido."]);
+            exit;
         }
     }
 
@@ -51,35 +53,49 @@ class ImpostoController extends Controller {
     }
 
     public function update() {
-        if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["id"])) {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             session_start();
-            $id = intval($_POST["id"]);
-            $cambio = htmlspecialchars($_POST["cambio"], ENT_QUOTES, "UTF-8");
-            $fga = htmlspecialchars($_POST["fga"], ENT_QUOTES, "UTF-8");
-            $iva = htmlspecialchars($_POST["iva"], ENT_QUOTES, "UTF-8");
-            $desconto = htmlspecialchars($_POST["desconto"], ENT_QUOTES, "UTF-8");
-            $cambio_geral = htmlspecialchars($_POST["cambio_geral"], ENT_QUOTES, "UTF-8");
 
-            if (!empty($cambio) && !empty($fga) && !empty($iva) && !empty($desconto) && !empty($cambio_geral)) {
-                $resultado = $this->modelo->atualizar($id, $cambio, $fga, $iva, $desconto, $cambio_geral);
+            // Obtenha os dados do formulário
+            $id = $_POST['id'];
+            $cambio = $_POST['cambio'];
+            $fga = $_POST['fga'];
+            $iva = $_POST['iva'];
+            $desconto = $_POST['desconto'];
+            $cambioGeral = $_POST['cambio_geral'];
 
-                $_SESSION[$resultado ? "success" : "error"] = 
-                    $resultado ? "Imposto atualizado com sucesso!" : "Erro ao atualizar.";
+            // Atualize os dados no banco de dados
+            $resultado = $this->modelo->atualizar($id, $cambio, $fga, $iva, $desconto, $cambioGeral);
 
-                header('Location: /simulador/impostos');
-                exit;
+            if ($resultado) {
+                echo json_encode(["success" => true, "message" => "Imposto atualizado com sucesso!"]);
+            } else {
+                echo json_encode(["success" => false, "message" => "Erro ao atualizar o imposto."]);
             }
+            exit;
+        } else {
+            http_response_code(405); // Método não permitido
+            echo json_encode(["success" => false, "message" => "Método não permitido."]);
+            exit;
         }
     }
 
     public function delete($id) {
-        session_start();
-        $resultado = $this->modelo->excluir($id);
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            session_start();
+            $resultado = $this->modelo->excluir($id);
 
-        $_SESSION[$resultado ? "success" : "error"] = 
-            $resultado ? "Imposto excluído com sucesso!" : "Erro ao excluir.";
-
-        header('Location: /simulador/impostos');
-        exit;
+            if ($resultado) {
+                echo json_encode(["success" => true, "message" => "Imposto excluído com sucesso!"]);
+            } else {
+                echo json_encode(["success" => false, "message" => "Erro ao excluir o imposto."]);
+            }
+            exit;
+        } else {
+            http_response_code(405); // Método não permitido
+            echo json_encode(["success" => false, "message" => "Método não permitido."]);
+            exit;
+        }
     }
+    
 }
